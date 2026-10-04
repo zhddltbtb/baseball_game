@@ -1,0 +1,2304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>야구 오락실</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+    :root {
+      --primary: #8b5cf6;
+      --secondary: #f43f5e;
+      --bg-start: #fff1f2;
+      --bg-mid: #f0f9ff;
+      --bg-end: #f3e8ff;
+      --card-bg: #ffffff;
+      --text: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Jua', sans-serif;
+      line-height: 1.6;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      user-select: none;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 { line-height: 1.4; }
+    p, span, label, input, select, button, textarea, td, th { line-height: 1.5; }
+
+    .team-card {
+      border: 2px solid #f1f5f9;
+      border-radius: 12px;
+      padding: 6px 3px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      background: #ffffff;
+    }
+
+    .team-card.selected {
+      border-color: #a855f7;
+      background: #f3e8ff;
+      transform: scale(1.03);
+    }
+
+    /* Perfect Centered Avatar Circle */
+    .avatar-circle {
+      position: relative;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+    }
+
+    .avatar-circle span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 1;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    /* Avatar Frame Effects */
+    .frame-none { border: 3px solid #ffffff; }
+    .frame-gold {
+      border: 3.5px solid #f59e0b;
+      box-shadow: 0 0 10px #fbbf24, inset 0 0 6px #f59e0b;
+      animation: pulse-gold 2s infinite alternate;
+    }
+    .frame-neon {
+      border: 3.5px solid #06b6d4;
+      box-shadow: 0 0 12px #22d3ee, 0 0 4px #0891b2;
+      animation: neon-glow 1.5s infinite alternate;
+    }
+    .frame-diamond {
+      border: 3.5px solid #a855f7;
+      box-shadow: 0 0 12px #c084fc, inset 0 0 6px #e879f9;
+    }
+    .frame-fire {
+      border: 3.5px solid #ef4444;
+      box-shadow: 0 0 12px #f87171, 0 0 6px #f59e0b;
+      animation: fire-pulse 1.2s infinite alternate;
+    }
+    .frame-crown {
+      border: 3.5px solid #eab308;
+      box-shadow: 0 0 14px #fde047;
+    }
+    .frame-cyber {
+      border: 3.5px solid #10b981;
+      box-shadow: 0 0 12px #34d399, inset 0 0 4px #059669;
+    }
+    .frame-rainbow {
+      border: 3.5px solid #ec4899;
+      box-shadow: 0 0 14px #f43f5e, 0 0 8px #a855f7, 0 0 4px #3b82f6;
+      animation: rainbow-glow 2s infinite linear;
+    }
+    .frame-sakura {
+      border: 3.5px solid #f472b6;
+      box-shadow: 0 0 12px #fbcfe8, inset 0 0 6px #f472b6;
+    }
+    .frame-shadow {
+      border: 3.5px solid #334155;
+      box-shadow: 0 0 10px #0f172a, inset 0 0 6px #475569;
+    }
+    .frame-galaxy {
+      border: 3.5px solid #6366f1;
+      box-shadow: 0 0 14px #818cf8, inset 0 0 8px #c084fc;
+    }
+
+    @keyframes pulse-gold {
+      from { box-shadow: 0 0 6px #f59e0b; }
+      to { box-shadow: 0 0 14px #fbbf24, 0 0 2px #d97706; }
+    }
+    @keyframes neon-glow {
+      from { box-shadow: 0 0 6px #06b6d4; }
+      to { box-shadow: 0 0 16px #67e8f9; }
+    }
+    @keyframes fire-pulse {
+      from { box-shadow: 0 0 6px #ef4444; }
+      to { box-shadow: 0 0 16px #fb923c, 0 0 8px #dc2626; }
+    }
+    @keyframes rainbow-glow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    /* Stadium Background Styling */
+    .stadium-bg-style {
+      background-image: linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.45)), url('https://images.unsplash.com/photo-1508344928928-7165b67de128?auto=format&fit=crop&w=1000&q=80') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      color: white !important;
+    }
+
+    .btn-bell {
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      font-size: 1.1rem;
+      padding: 10px;
+      border-radius: 40px;
+      box-shadow: 0 4px 0 #e11d48;
+      margin-top: 12px;
+      transition: transform 0.1s;
+      color: white;
+    }
+
+    .btn-bell:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #e11d48;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .game-board { grid-template-columns: 1fr; }
+    }
+
+    .player-zone {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+      position: relative;
+    }
+
+    .player-zone.active-turn {
+      border-color: #f472b6;
+      background: #fdf2f8;
+    }
+
+    .player-zone.me {
+      border-color: #c084fc;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .card-halli {
+      width: 75px;
+      height: 105px;
+      background: white;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      margin: 8px auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 6px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: white;
+      font-size: 1.3rem;
+    }
+
+    .status-bar {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mem-card {
+      aspect-ratio: 1 / 1;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .mem-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.4s;
+      transform-style: preserve-3d;
+    }
+
+    .mem-card.flipped .mem-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .mem-card-front, .mem-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .mem-card-front {
+      background: linear-gradient(135deg, #a7f3d0, #38bdf8);
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .mem-card-back {
+      background: white;
+      transform: rotateY(180deg);
+    }
+
+    .draw-paper {
+      background: linear-gradient(135deg, #fef08a, #fde047);
+      border: 2px dashed #ca8a04;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .draw-paper:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center p-2.5 md:p-5" onload="initApp()">
+
+  <header class="text-center mb-3 w-full max-w-3xl">
+    <h1 class="text-xl md:text-2xl font-extrabold text-purple-900 flex items-center justify-center gap-1.5 leading-normal">
+      <span>⚾</span> 야구 오락실 <span>✨</span>
+    </h1>
+    <p class="text-slate-500 text-[11px] md:text-xs mt-0.5 leading-normal">구단 아바타와 다양한 아이템을 꾸미고 미니게임에 도전하세요!</p>
+
+    <!-- Currency Display Bar -->
+    <div class="flex items-center justify-center gap-3 mt-2 bg-white/80 backdrop-blur border border-pink-200 text-slate-700 font-extrabold px-4 py-1.5 rounded-full shadow-sm max-w-xs mx-auto text-[11px] md:text-xs">
+      <div class="flex items-center gap-1">
+        <span>⚾ 크보:</span>
+        <span id="displayKbo" class="text-amber-500 text-sm leading-none">150</span>
+      </div>
+      <div class="w-px h-3.5 bg-pink-200"></div>
+      <div class="flex items-center gap-1">
+        <span>💎 케보:</span>
+        <span id="displayKebo" class="text-cyan-500 text-sm leading-none">0</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="flex justify-center gap-1 mt-3 bg-white/70 backdrop-blur p-1 rounded-2xl shadow-sm border border-pink-100 flex-wrap">
+      <button id="tab-halli" onclick="switchTab('halli')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] transition-all bg-purple-500 text-white shadow-sm">
+        🔔 얄리갈리
+      </button>
+      <button id="tab-memory" onclick="switchTab('memory')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        🃏 메모리 카드
+      </button>
+      <button id="tab-quiz" onclick="switchTab('quiz')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        ❓ 야구 퀴즈
+      </button>
+      <button id="tab-homerun" onclick="switchTab('homerun')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        🚀 홈런 더비
+      </button>
+      <button id="tab-running" onclick="switchTab('running')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        🏃‍♂️ 나는 주루왕
+      </button>
+      <button id="tab-avatarselect" onclick="switchTab('avatarselect')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        👤 아바타 설정
+      </button>
+      <button id="tab-avatarshop" onclick="switchTab('avatarshop')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        🛒 아이템 상점
+      </button>
+      <button id="tab-leaderboard" onclick="switchTab('leaderboard')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        🏆 리더보드
+      </button>
+      <button id="tab-guestbook" onclick="switchTab('guestbook')" class="flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all">
+        ✍🏻 방명록
+      </button>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-3xl bg-white/90 backdrop-blur rounded-3xl shadow-xl border border-white/50 p-4 md:p-6">
+
+    <!-- Modal Banner -->
+    <div id="appModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+      <div class="bg-white rounded-3xl p-5 max-w-xs w-full shadow-2xl text-center transform transition-all border border-pink-100">
+        <div id="modalIcon" class="text-3xl mb-1.5">⚾</div>
+        <h3 id="modalTitle" class="text-base font-bold text-slate-800 mb-1.5 leading-snug">알림</h3>
+        <p id="modalMsg" class="text-slate-600 mb-4 text-[11px] md:text-xs whitespace-pre-line leading-relaxed">메시지 내용</p>
+        <button onclick="closeModal()" class="w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white font-bold rounded-xl shadow transition text-xs">확인</button>
+      </div>
+    </div>
+
+    <!-- Lucky Draw Paper Modal -->
+    <div id="drawModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+      <div class="bg-gradient-to-br from-pink-50 to-purple-50 rounded-3xl p-5 max-w-sm w-full shadow-2xl text-center border-2 border-pink-200">
+        <div class="text-3xl mb-1">🎁</div>
+        <h3 class="text-base font-extrabold text-purple-900 mb-0.5 leading-snug">행운의 미니 종이 뽑기</h3>
+        <p class="text-slate-500 text-[11px] mb-4 leading-normal">하나의 뽑기 종이를 선택해 열어보세요! 희귀한 케보(💎)를 얻을 수 있습니다.</p>
+
+        <div id="drawPaperGrid" class="grid grid-cols-3 gap-2 mb-4"></div>
+
+        <button onclick="closeDrawModal()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs">닫기</button>
+      </div>
+    </div>
+
+    <!-- ================= GAME 1: KBO YALLI GALLI ================= -->
+    <section id="sec-halli" class="block">
+      <div id="setupPanel">
+        <div class="w-full">
+          <div id="loginBox">
+            <div class="mb-2">
+              <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">아이디 / 닉네임</label>
+              <input type="text" id="loginEmail" class="w-full p-1.5 border border-purple-200 rounded-xl text-[11px] outline-none focus:border-purple-400" placeholder="아이디 입력" value="Player1">
+            </div>
+            <div class="mb-2">
+              <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">비밀번호</label>
+              <input type="password" id="loginPw" class="w-full p-1.5 border border-purple-200 rounded-xl text-[11px] outline-none focus:border-purple-400" placeholder="비밀번호 입력" value="1234">
+            </div>
+          </div>
+
+          <div id="userBar" class="hidden mb-2.5 bg-purple-100/50 p-2.5 rounded-2xl border border-purple-200">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div id="userBarAvatar" class="avatar-circle w-7 h-7 frame-none text-xs" style="background:#1e1b4b; color:white;">
+                  <span>🐻</span>
+                </div>
+                <span id="userAccountText" class="font-bold text-slate-800 text-[11px]"></span>
+              </div>
+              <span id="userTeamBadge" class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-[9px] font-semibold"></span>
+            </div>
+            <div class="flex gap-2.5 mt-1 text-[10px] pl-9">
+              <button onclick="changeNickname()" class="text-purple-600 hover:underline font-bold">닉네임 변경</button>
+              <button onclick="logout()" class="text-rose-500 hover:underline">로그아웃</button>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">응원 구단 선택</label>
+            <div class="grid grid-cols-5 gap-1 mt-0.5" id="teamSelector"></div>
+          </div>
+
+          <button class="w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white font-bold text-[11px] rounded-xl transition shadow-sm" onclick="handleLogin()">프로필 저장 반영</button>
+        </div>
+
+        <hr class="my-4 border-purple-100">
+
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 mb-2 leading-normal">🎮 얄리갈리 게임 시작 설정</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">플레이어 닉네임</label>
+              <input type="text" id="playerName" class="w-full p-1.5 border border-purple-200 rounded-xl text-[11px]" value="홈런왕">
+            </div>
+            <div>
+              <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">게임 모드</label>
+              <select id="gameMode" onchange="toggleMultiplayerInput()" class="w-full p-1.5 border border-purple-200 rounded-xl text-[11px]">
+                <option value="ai">AI 대전 (싱글)</option>
+                <option value="multi">방 입력 멀티 플레이 🌐</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Room Code Input for Multi Play -->
+          <div id="roomCodeGroup" class="mt-2 hidden">
+            <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">방 번호 (4자리 숫자)</label>
+            <input type="text" id="roomCodeInput" maxlength="4" class="w-full p-1.5 border border-pink-300 rounded-xl text-[11px] font-bold text-purple-900" placeholder="예: 7777">
+          </div>
+
+          <div class="mt-2" id="countGroup">
+            <label class="block font-semibold mb-0.5 text-[10px] text-slate-700 leading-normal">인원 수 (AI 포함)</label>
+            <select id="playerCount" class="w-full p-1.5 border border-purple-200 rounded-xl text-[11px]">
+              <option value="2">2인 대전</option>
+              <option value="3">3인 대전</option>
+              <option value="4" selected>4인 대전</option>
+            </select>
+          </div>
+
+          <button id="btnSingleStart" class="w-full mt-3 py-2.5 bg-gradient-to-r from-pink-400 to-rose-400 hover:opacity-90 text-white font-bold rounded-2xl text-sm shadow-md transition" onclick="initGame()">게임 시작하기 🚀</button>
+        </div>
+      </div>
+
+      <div id="gamePanel" class="hidden">
+        <div class="status-bar" id="msg">게임을 시작합니다!</div>
+        <div id="turnInfo" class="text-center font-bold mb-2 text-slate-800 text-xs leading-normal"></div>
+
+        <div class="game-board" id="board"></div>
+
+        <button class="btn-bell w-full text-white font-black hover:brightness-105 active:scale-95 shadow-md" onclick="ringBell()">🔔 종 치기 (BELL)!</button>
+
+        <div class="mt-4 text-center">
+          <button onclick="resetHalliGame()" class="px-4 py-1.5 bg-slate-500 hover:bg-slate-600 text-white font-bold text-[11px] rounded-xl shadow transition">
+            🏠 처음으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GAME 2: BASEBALL MEMORY CARD ================= -->
+    <section id="sec-memory" class="hidden">
+      <div id="memSetup" class="text-center py-4">
+        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-2 shadow-inner">
+          🃏
+        </div>
+        <h2 class="text-lg font-black text-slate-800 mb-0.5 leading-snug">야구 메모리 카드 게임</h2>
+        <p class="text-slate-500 text-[11px] mb-4 max-w-md mx-auto leading-normal">정사각형 카드 뒤에 숨은 KBO 야구 짝을 맞춰보세요!</p>
+
+        <div class="max-w-xs mx-auto mb-4">
+          <label class="block font-bold text-[11px] text-slate-700 mb-1 text-left leading-normal">난이도 선택</label>
+          <select id="memDifficulty" class="w-full p-2 border border-purple-200 rounded-xl font-bold text-[11px] text-slate-800 bg-white">
+            <option value="easy">쉬움 (6쌍 / 12장)</option>
+            <option value="normal" selected>보통 (8쌍 / 16장)</option>
+            <option value="hard">어려움 (10쌍 / 20장)</option>
+          </select>
+        </div>
+
+        <button onclick="startMemoryGame()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-black text-sm rounded-2xl shadow transition transform hover:-translate-y-0.5">
+          게임 시작하기 🚀
+        </button>
+      </div>
+
+      <div id="memPlay" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 bg-purple-50/50 p-2.5 rounded-2xl border border-purple-100">
+          <div>
+            <h2 class="text-base font-bold text-purple-950 flex items-center gap-1.5 leading-snug">
+              <span>🃏</span> 야구 메모리 카드 게임
+            </h2>
+            <p class="text-[9px] text-slate-500 mt-0.5 leading-normal">같은 야구 카드 짝을 맞춰 점수를 획득하세요!</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="startMemoryGame()" class="px-2.5 py-1 bg-purple-500 hover:bg-purple-600 text-white font-bold text-[10px] rounded-xl shadow-sm transition">
+              🔄 재시작
+            </button>
+            <button onclick="resetMemoryGame()" class="px-2.5 py-1 bg-slate-500 hover:bg-slate-600 text-white font-bold text-[10px] rounded-xl shadow-sm transition">
+              🏠 처음으로
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-1.5 text-center mb-4">
+          <div class="bg-purple-50 border border-purple-100 p-1.5 rounded-2xl">
+            <div class="text-[9px] text-purple-800 font-semibold leading-normal">시도 횟수</div>
+            <div id="memMoves" class="text-sm md:text-base font-black text-purple-900 leading-snug">0</div>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-100 p-1.5 rounded-2xl">
+            <div class="text-[9px] text-emerald-800 font-semibold leading-normal">맞춘 짝</div>
+            <div id="memPairs" class="text-sm md:text-base font-black text-emerald-900 leading-snug">0 / 8</div>
+          </div>
+          <div class="bg-amber-50 border border-amber-100 p-1.5 rounded-2xl">
+            <div class="text-[9px] text-amber-800 font-semibold leading-normal">진행 시간</div>
+            <div id="memTimer" class="text-sm md:text-base font-black text-amber-900 leading-snug">00:00</div>
+          </div>
+          <div class="bg-pink-50 border border-pink-100 p-1.5 rounded-2xl">
+            <div class="text-[9px] text-pink-800 font-semibold leading-normal">상태</div>
+            <div id="memBest" class="text-sm md:text-base font-black text-pink-900 leading-snug">진행중</div>
+          </div>
+        </div>
+
+        <div id="memoryGrid" class="grid grid-cols-4 gap-2.5 max-w-md mx-auto my-2 min-h-[260px]"></div>
+
+        <div class="text-center mt-4">
+          <button onclick="resetMemoryGame()" class="px-4 py-1.5 bg-slate-500 hover:bg-slate-600 text-white font-bold text-[11px] rounded-xl shadow transition">
+            🏠 처음으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GAME 3: BASEBALL QUIZ ================= -->
+    <section id="sec-quiz" class="hidden">
+      <div id="quizSetup" class="text-center py-4">
+        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-2 shadow-inner">
+          ❓
+        </div>
+        <h2 class="text-lg font-black text-slate-800 mb-0.5 leading-snug">야구 상식 & KBO 퀴즈 골든벨</h2>
+        <p class="text-slate-500 text-[11px] mb-4 max-w-md mx-auto leading-normal">다양해진 풍부한 야구 지식 문제를 풀고 야구 박사에 도전하세요!</p>
+
+        <div class="max-w-xs mx-auto mb-4">
+          <label class="block font-bold text-[10px] text-slate-700 mb-1 text-left leading-normal">퀴즈 카테고리 선택</label>
+          <select id="quizCategory" class="w-full p-2 border border-purple-200 rounded-xl font-bold text-[11px] text-slate-800">
+            <option value="all">⚾ 전체 종합 문제</option>
+            <option value="rules">📜 야구 규칙 & 용어</option>
+            <option value="kbo">🦁 KBO 리그 역사 & 기록</option>
+            <option value="trivia">💡 상식 & 에피소드</option>
+          </select>
+        </div>
+
+        <button onclick="startQuiz()" class="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-orange-400 text-white font-black text-sm rounded-2xl shadow transition transform hover:-translate-y-0.5">
+          퀴즈 도전하기 🎯
+        </button>
+      </div>
+
+      <div id="quizPlay" class="hidden">
+        <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-1.5 leading-normal">
+          <span id="quizProgressText">문제 1 / 10</span>
+          <span id="quizScoreText" class="text-purple-900 font-extrabold text-[11px]">점수: 0점 (연속 0)</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2 mb-4 overflow-hidden">
+          <div id="quizProgressBar" class="bg-gradient-to-r from-purple-400 to-pink-400 h-full w-0 transition-all duration-300"></div>
+        </div>
+
+        <div class="bg-purple-50/60 border border-purple-100 rounded-2xl p-4 mb-4">
+          <div class="flex items-center gap-1.5 mb-1.5">
+            <span id="quizCatBadge" class="bg-purple-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full">야구 퀴즈</span>
+          </div>
+          <h3 id="quizQuestion" class="text-sm md:text-base font-extrabold text-slate-800 leading-relaxed">
+            질문 내용이 여기에 들어갑니다.
+          </h3>
+        </div>
+
+        <div id="quizOptions" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 text-[11px]"></div>
+
+        <div id="quizExplanation" class="hidden bg-slate-100 border-l-4 border-purple-500 p-3 rounded-r-xl mb-4">
+          <h4 id="quizResultTitle" class="font-extrabold text-[11px] mb-0.5 leading-snug"></h4>
+          <p id="quizExplainText" class="text-[10px] md:text-[11px] text-slate-600 leading-relaxed"></p>
+        </div>
+
+        <button id="btnNextQuiz" onclick="nextQuestion()" class="hidden w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] rounded-xl shadow transition">
+          다음 문제로 ➡
+        </button>
+      </div>
+
+      <div id="quizResult" class="hidden text-center py-4">
+        <div id="quizResultBadge" class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-2 shadow-inner">
+          🏆
+        </div>
+        <h2 id="quizRankTitle" class="text-lg font-black text-slate-900 mb-0.5 leading-snug">퀴즈 종료!</h2>
+        <p id="quizFinalScore" class="text-sm text-purple-900 font-bold mb-2 leading-normal">최종 점수: 0점</p>
+        <p id="quizFeedback" class="text-[11px] text-slate-500 max-w-md mx-auto mb-4 leading-normal">당신은 KBO 리그의 야구 지식인입니다!</p>
+
+        <div class="flex justify-center gap-2">
+          <button onclick="startQuiz()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] rounded-xl shadow transition">
+            다시 도전하기 🔄
+          </button>
+          <button onclick="resetQuizGame()" class="px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white font-bold text-[11px] rounded-xl transition">
+            🏠 처음으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GAME 4: HOME RUN DERBY ================= -->
+    <section id="sec-homerun" class="hidden">
+      <div id="hrSetup" class="text-center py-4">
+        <div class="w-12 h-12 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-2 shadow-inner">
+          🚀
+        </div>
+        <h2 class="text-lg font-black text-slate-800 mb-0.5 leading-snug">KBO 홈런 더비 챌린지</h2>
+        <p class="text-slate-500 text-[11px] mb-4 max-w-md mx-auto leading-normal">투수가 던지는 공의 위치와 게이지 타이밍을 일치시켜 담장을 넘겨보세요!</p>
+
+        <button onclick="startHomerunGame()" class="px-5 py-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-black text-sm rounded-2xl shadow transition transform hover:-translate-y-0.5">
+          타석 입장하기 ⚾
+        </button>
+      </div>
+
+      <div id="hrPlay" class="hidden">
+        <div class="flex items-center justify-between bg-slate-800 text-white p-2.5 rounded-2xl mb-3 text-[11px] font-bold leading-normal">
+          <div>남은 기회: <span id="hrOuts" class="text-pink-300 text-xs">10</span></div>
+          <div>홈런 수: <span id="hrCount" class="text-amber-300 text-xs">0</span></div>
+          <div>총 비거리: <span id="hrDistance" class="text-cyan-300 text-xs">0m</span></div>
+        </div>
+
+        <div class="relative w-full h-48 md:h-60 bg-gradient-to-b from-sky-200 via-pink-100 to-emerald-300 rounded-3xl overflow-hidden border-2 border-purple-200 flex flex-col justify-between p-3 shadow-inner">
+          <div class="flex justify-between items-start z-10">
+            <div id="hrPitchInfo" class="bg-white/80 backdrop-blur text-purple-900 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm leading-normal">
+              투수 준비 중...
+            </div>
+            <div id="hrCombo" class="bg-amber-400 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black hidden shadow-sm leading-normal">
+              COMBO x2!
+            </div>
+          </div>
+
+          <div class="relative flex-1 flex items-center justify-center my-1">
+            <div class="absolute left-4 text-2xl">🧢</div>
+
+            <div class="absolute right-10 w-12 h-20 border-2 border-dashed border-amber-500 rounded-2xl bg-yellow-300/30 flex items-center justify-center">
+              <span class="text-[8px] text-amber-900 font-black leading-tight">HIT ZONE</span>
+            </div>
+
+            <div id="hrBall" class="absolute left-[5%] text-lg transition-all duration-75 opacity-0" style="left: 5%;">
+              ⚾
+            </div>
+
+            <div id="hrBat" class="absolute right-3 text-2xl md:text-3xl transform scale-x-[-1] transition-transform duration-100 origin-bottom-left">
+              🏏
+            </div>
+
+            <div id="hrHitBanner" class="absolute text-center z-20 hidden">
+              <div id="hrHitTitle" class="text-lg md:text-2xl font-black text-yellow-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] leading-snug">HOME RUN!</div>
+              <div id="hrHitSub" class="text-[11px] font-extrabold text-white drop-shadow leading-snug">145m</div>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-900/60 p-1.5 rounded-2xl z-10 flex items-center gap-2 backdrop-blur">
+            <span class="text-white text-[10px] font-bold whitespace-nowrap leading-normal">타이밍 게이지:</span>
+            <div class="relative flex-1 h-3.5 bg-slate-700 rounded-full overflow-hidden border border-slate-500">
+              <div class="absolute left-[70%] w-[20%] h-full bg-amber-400/50"></div>
+              <div class="absolute left-[80%] w-[8%] h-full bg-emerald-400"></div>
+              <div id="hrTimingMarker" class="absolute top-0 bottom-0 w-1 bg-white rounded-full shadow transition-all duration-75" style="left: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <button id="btnSwing" onclick="swingBat()" class="w-full mt-3 py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black text-base md:text-lg rounded-2xl shadow-lg transition transform active:scale-95 border-b-4 border-rose-700">
+          💥 스윙 (SWING)!
+        </button>
+
+        <div class="mt-4 text-center">
+          <button onclick="resetHomerunGame()" class="px-4 py-1.5 bg-slate-500 hover:bg-slate-600 text-white font-bold text-[11px] rounded-xl shadow transition">
+            🏠 처음으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GAME 5: BASE RUNNING MARATHON ================= -->
+    <section id="sec-running" class="hidden">
+      <div id="runSetup" class="text-center py-4">
+        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-2 shadow-inner transform scale-x-[-1]">
+          🏃‍♂️
+        </div>
+        <h2 class="text-lg font-black text-slate-800 mb-0.5 leading-snug">나는 주루왕 베이스 마라톤</h2>
+        <p class="text-slate-500 text-[11px] mb-4 max-w-md mx-auto leading-normal">버튼을 무한 연타하여 멈춤 없이 홈까지 폭풍 질주하세요!</p>
+
+        <button onclick="startRunningGame()" class="px-5 py-2.5 bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-black text-sm rounded-2xl shadow transition transform hover:-translate-y-0.5">
+          달리기 시작하기 🏃‍♂️
+        </button>
+      </div>
+
+      <div id="runPlay" class="hidden">
+        <div class="flex justify-between items-center bg-slate-800 text-white p-2.5 rounded-2xl mb-3 text-[11px] font-bold leading-normal">
+          <div>남은 거리: <span id="runDistanceLeft" class="text-amber-300 text-xs">100m</span></div>
+          <div>현재 베이스: <span id="runCurrentBase" class="text-cyan-300 text-xs">타석</span></div>
+          <div>경과 시간: <span id="runTimer" class="text-purple-300 text-xs">0.0초</span></div>
+        </div>
+
+        <div class="relative w-full h-32 bg-emerald-500/80 border-2 border-emerald-600 rounded-3xl overflow-hidden p-3 mb-3 flex flex-col justify-between shadow-inner">
+          <div class="flex justify-between items-center text-white text-[9px] font-bold z-10 leading-normal">
+            <span class="bg-black/30 px-2 py-0.5 rounded-full">홈 (출발)</span>
+            <span class="bg-black/30 px-2 py-0.5 rounded-full">1루 (25m)</span>
+            <span class="bg-black/30 px-2 py-0.5 rounded-full">2루 (50m)</span>
+            <span class="bg-black/30 px-2 py-0.5 rounded-full">3루 (75m)</span>
+            <span class="bg-black/30 px-2 py-0.5 rounded-full">홈 (100m)</span>
+          </div>
+
+          <div class="relative w-full h-8 bg-amber-700/60 rounded-xl my-auto border border-amber-600 flex items-center px-1.5">
+            <div id="runnerAvatar" class="absolute left-2 transition-all duration-100 text-xl inline-block" style="transform: scaleX(-1) translateY(-1px);">
+              🏃‍♂️
+            </div>
+          </div>
+        </div>
+
+        <button id="btnRunDash" onclick="dashRunner()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 active:scale-95 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg transition border-b-4 border-indigo-800">
+          ⚡ 질주하기 (연타)! ⚡
+        </button>
+
+        <div class="mt-4 text-center">
+          <button onclick="resetRunningGame()" class="px-4 py-1.5 bg-slate-500 hover:bg-slate-600 text-white font-bold text-[11px] rounded-xl shadow transition">
+            🏠 처음으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION: AVATAR SELECTION ================= -->
+    <section id="sec-avatarselect" class="hidden">
+      <div class="text-center py-2 mb-3 border-b border-purple-100">
+        <div class="w-11 h-11 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl mx-auto mb-1.5 shadow-inner">
+          👤
+        </div>
+        <h2 class="text-lg font-black text-slate-800 leading-snug">아바타 설정 & 장착</h2>
+        <p class="text-[10px] text-slate-500 mt-0.5 leading-normal">
+          구단 아바타 및 보유한 다양한 아이템을 선택하여 적용하세요!
+        </p>
+      </div>
+
+      <!-- Live Interactive Preview Container (장착 중 메세지 삭제됨) -->
+      <div id="previewCard" class="p-4 rounded-2xl border text-center mb-5 max-w-sm mx-auto shadow-sm transition-all duration-300 bg-cover bg-center">
+        <span class="text-[10px] font-bold text-purple-700 bg-white/90 px-2.5 py-0.5 rounded-full border border-purple-200">내 실시간 아바타 미리보기</span>
+        <div class="my-3 flex items-center justify-center">
+          <div id="previewAvatarCircle" class="avatar-circle w-20 h-20 frame-none text-3xl" style="background: #1e1b4b; color: white;">
+            <span>🐻</span>
+          </div>
+        </div>
+        <h3 id="previewTeamName" class="font-extrabold text-sm text-slate-800">두산 베어스</h3>
+      </div>
+
+      <!-- Owned Shop Items List -->
+      <div class="mb-5">
+        <h3 class="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1">
+          <span>🎁</span> 보유 중인 아이템 (이곳에서 장착 가능)
+        </h3>
+        <div id="ownedFramesList" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      </div>
+
+      <!-- Team Selection Shortcut -->
+      <div>
+        <h3 class="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1">
+          <span>⚾</span> 구단 아바타 변경
+        </h3>
+        <div class="grid grid-cols-5 gap-1.5" id="avatarSelectTeamGrid"></div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION: ITEM SHOP ================= -->
+    <section id="sec-avatarshop" class="hidden">
+      <div class="text-center py-2 mb-3 border-b border-purple-100">
+        <div class="w-11 h-11 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-xl mx-auto mb-1.5 shadow-inner">
+          🛒
+        </div>
+        <h2 class="text-lg font-black text-slate-800 leading-snug">아이템 상점</h2>
+        <p class="text-[10px] text-slate-500 mt-0.5 leading-normal">
+          크보(⚾)와 케보(💎)를 사용하여 특별한 테두리, 경기장 배경, 글자 색 아이템을 구매해보세요! (장착은 '아바타 설정' 메뉴에서 전용 관리합니다)
+        </p>
+      </div>
+
+      <!-- Shop Items Grid -->
+      <div id="avatarShopGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+    </section>
+
+    <!-- ================= SECTION 8: LEADERBOARD ================= -->
+    <section id="sec-leaderboard" class="hidden">
+      <div class="text-center py-2 mb-3 border-b border-purple-100">
+        <div class="w-11 h-11 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xl mx-auto mb-1.5 shadow-inner">
+          🏆
+        </div>
+        <h2 class="text-lg font-black text-slate-800 leading-snug">주간 명예의 전당 (리더보드)</h2>
+        <p class="text-[10px] text-slate-500 mt-0.5 leading-normal">
+          실시간 도전으로 최고 기록을 달성하고 명예의 전당에 올라보세요!
+        </p>
+      </div>
+
+      <!-- Leaderboard Category Tabs -->
+      <div class="flex justify-center gap-1 mb-3 flex-wrap text-[11px]">
+        <button onclick="renderLeaderboard('homerun')" id="lbBtn-homerun" class="px-3 py-1 rounded-xl font-bold bg-purple-500 text-white shadow-sm">
+          🚀 홈런 더비
+        </button>
+        <button onclick="renderLeaderboard('running')" id="lbBtn-running" class="px-3 py-1 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-purple-100">
+          🏃‍♂️ 나는 주루왕
+        </button>
+        <button onclick="renderLeaderboard('quiz')" id="lbBtn-quiz" class="px-3 py-1 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-purple-100">
+          ❓ 야구 퀴즈
+        </button>
+        <button onclick="renderLeaderboard('memory')" id="lbBtn-memory" class="px-3 py-1 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-purple-100">
+          🃏 메모리 카드
+        </button>
+      </div>
+
+      <!-- Leaderboard Records List -->
+      <div class="overflow-x-auto bg-white rounded-2xl border border-purple-100 shadow-sm">
+        <table class="w-full text-left text-[11px]">
+          <thead class="bg-purple-50/70 border-b border-purple-100 text-slate-700 font-bold">
+            <tr>
+              <th class="p-2.5 text-center w-14">순위</th>
+              <th class="p-2.5">플레이어</th>
+              <th class="p-2.5">응원 구단</th>
+              <th class="p-2.5 text-right">최고 기록</th>
+              <th class="p-2.5 text-center">보상</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardList" class="divide-y divide-purple-50">
+            <!-- Dynamic Leaderboard Items -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 9: GUESTBOOK ================= -->
+    <section id="sec-guestbook" class="hidden">
+      <div class="text-center py-2 mb-2 border-b border-purple-100">
+        <div class="w-11 h-11 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-xl mx-auto mb-1.5 shadow-inner">
+          ✍🏻
+        </div>
+        <h2 class="text-lg font-black text-slate-800 leading-snug">오락실 응원 방명록</h2>
+        <p class="text-[10px] text-slate-500 mt-0.5 leading-normal">오락실 팬들과 자유롭게 응원의 한마디를 나누어 보세요!</p>
+      </div>
+
+      <div class="bg-purple-50/60 border border-purple-100 p-3 rounded-2xl mb-4 max-w-lg mx-auto">
+        <div class="mb-1.5">
+          <textarea id="guestbookMsg" rows="2" class="w-full p-2 border border-purple-200 rounded-xl text-[11px] outline-none focus:border-purple-400 resize-none" placeholder="응원의 한마디나 소감을 적어주세요!"></textarea>
+        </div>
+        <button onclick="submitGuestbook()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] rounded-xl transition shadow-sm">
+          ✍🏻 방명록 등록하기
+        </button>
+      </div>
+
+      <div id="guestbookList" class="space-y-2 max-w-lg mx-auto"></div>
+    </section>
+
+  </main>
+
+  <script>
+    const KBO_TEAMS = [
+      { id: 'bear', name: '두산 베어스', icon: '🐻', bg: '#1e1b4b' },
+      { id: 'eagle', name: '한화 이글스', icon: '🦅', bg: '#f97316' },
+      { id: 'dog', name: 'SSG 랜더스', icon: '🐶', bg: '#e11d48' },
+      { id: 'lion', name: '삼성 라이온즈', icon: '🦁', bg: '#2563eb' },
+      { id: 'twin', name: 'LG 트윈스', icon: '⚾', bg: '#be123c' },
+      { id: 'giant', name: '롯데 자이언츠', icon: '⚓', bg: '#1e3a8a' },
+      { id: 'hero', name: '키움 히어로즈', icon: '🦸', bg: '#881337' },
+      { id: 'dino', name: 'NC 다이노스', icon: '🦖', bg: '#0f172a' },
+      { id: 'wiz', name: 'kt wiz', icon: '🧙', bg: '#18181b' },
+      { id: 'tiger', name: 'KIA 타이거즈', icon: '🐯', bg: '#dc2626' }
+    ];
+
+    // High quality stadium picture background
+    const REAL_STADIUM_IMG = "https://images.unsplash.com/photo-1508344928928-7165b67de128?auto=format&fit=crop&w=1000&q=80";
+
+    const AVATAR_ITEMS = [
+      // 테두리 아이템 (대량 추가)
+      { id: 'frame-none', category: 'frame', name: '기본 테두리', cssClass: 'frame-none', priceType: 'kbo', price: 0, desc: '깔끔한 기본 원형 아바타 테두리' },
+      { id: 'frame-gold', category: 'frame', name: '골드 테두리 🥇', cssClass: 'frame-gold', priceType: 'kbo', price: 200, desc: '빛나는 금빛 골드 번쩍 레이어' },
+      { id: 'frame-neon', category: 'frame', name: '네온 아우라 ✨', cssClass: 'frame-neon', priceType: 'kbo', price: 400, desc: '시원한 네온 컬러의 아우라 오라' },
+      { id: 'frame-diamond', category: 'frame', name: '다이아 테두리 💎', cssClass: 'frame-diamond', priceType: 'kebo', price: 5, desc: '희귀 다이아몬드 퍼플 빛 테두리' },
+      { id: 'frame-fire', category: 'frame', name: '불꽃 테두리 🔥', cssClass: 'frame-fire', priceType: 'kbo', price: 600, desc: '열정의 불꽃 타오르는 테두리' },
+      { id: 'frame-crown', category: 'frame', name: '왕관 골드 👑', cssClass: 'frame-crown', priceType: 'kebo', price: 10, desc: '황제의 골드 럭셔리 테두리' },
+      { id: 'frame-cyber', category: 'frame', name: '사이버 글로우 ⚡', cssClass: 'frame-cyber', priceType: 'kbo', price: 800, desc: '미래형 에메랄드 사이버 빛' },
+      { id: 'frame-rainbow', category: 'frame', name: '레인보우 글로우 🌈', cssClass: 'frame-rainbow', priceType: 'kebo', price: 15, desc: '영롱하게 회전하는 무지개 빛 테두리' },
+      { id: 'frame-sakura', category: 'frame', name: '사쿠라 핑크 🌸', cssClass: 'frame-sakura', priceType: 'kbo', price: 350, desc: '화사하게 피어나는 벚꽃 핑크 아우라' },
+      { id: 'frame-shadow', category: 'frame', name: '다크 섀도우 🦇', cssClass: 'frame-shadow', priceType: 'kbo', price: 500, desc: '묵직하고 카리스마 넘치는 다크 테두리' },
+      { id: 'frame-galaxy', category: 'frame', name: '갤럭시 오로라 🌌', cssClass: 'frame-galaxy', priceType: 'kebo', price: 8, desc: '은하수가 흐르는 신비로운 보랏빛 테두리' },
+
+      // 배경색 및 실제 경기장 배경 아이템 (멋지게 그래픽 강화)
+      { id: 'bg-default', category: 'bg', name: '기본 배경', styleBg: 'linear-gradient(to bottom right, #faf5ff, #f3e8ff)', isStadium: false, priceType: 'kbo', price: 0, desc: '기본 보라빛 라벤더 배경색' },
+      { id: 'bg-stadium', category: 'bg', name: '실제 야구장 패스 🏟️', styleBg: `url('${REAL_STADIUM_IMG}')`, isStadium: true, priceType: 'kbo', price: 500, desc: '멋진 고화질 실제 야구 경기장 스탠드 배경 사진' },
+      { id: 'bg-sunset', category: 'bg', name: '석양 노을 🌅', styleBg: 'linear-gradient(to bottom right, #ffedd5, #fecdd3)', isStadium: false, priceType: 'kbo', price: 150, desc: '따스하고 로맨틱한 핑크빛 노을 배경' },
+      { id: 'bg-emerald', category: 'bg', name: '에메랄드 숲 🌿', styleBg: 'linear-gradient(to bottom right, #d1fae5, #a7f3d0)', isStadium: false, priceType: 'kbo', price: 250, desc: '싱그러운 초록빛 힐링 에메랄드 배경' },
+      { id: 'bg-midnight', category: 'bg', name: '미드나잇 오로라 🌌', styleBg: 'linear-gradient(to bottom right, #312e81, #581c87)', isStadium: false, priceType: 'kebo', price: 3, desc: '몽환적이고 깊은 밤하늘 오로라 배경' },
+      { id: 'bg-neoncity', category: 'bg', name: '네온 시티 🏙️', styleBg: 'linear-gradient(to bottom right, #0f172a, #3b0764)', isStadium: false, priceType: 'kbo', price: 350, desc: '화려한 야경이 연상되는 시티 라이트' },
+      { id: 'bg-mint', category: 'bg', name: '민트 팝 🍦', styleBg: 'linear-gradient(to bottom right, #e0f2fe, #ccfbf1)', isStadium: false, priceType: 'kbo', price: 200, desc: '시원하고 청량한 민트 파스텔 배경' },
+      { id: 'bg-goldchamp', category: 'bg', name: '챔피언 골드 🏆', styleBg: 'linear-gradient(to bottom right, #fef3c7, #fde68a)', isStadium: false, priceType: 'kebo', price: 6, desc: '우승컵을 들어올린 황금빛 챔피언 배경' },
+
+      // 방명록 글자색 아이템 (대량 추가)
+      { id: 'textcolor-default', category: 'textcolor', name: '기본 텍스트', textStyleClass: 'text-slate-700', priceType: 'kbo', price: 0, desc: '깔끔한 기본 다크 슬레이트 폰트 색상' },
+      { id: 'textcolor-rose', category: 'textcolor', name: '장미 로즈 🌹', textStyleClass: 'text-rose-600 font-semibold', priceType: 'kbo', price: 100, desc: '화사하고 또렷한 핑크 로즈 글자 색' },
+      { id: 'textcolor-indigo', category: 'textcolor', name: '딥 인디고 💙', textStyleClass: 'text-indigo-600 font-semibold', priceType: 'kbo', price: 150, desc: '세련되고 매력적인 딥 블루 글자 색' },
+      { id: 'textcolor-gold', category: 'textcolor', name: '황금빛 로열 🌟', textStyleClass: 'text-amber-600 font-extrabold', priceType: 'kebo', price: 2, desc: '방명록에서 한눈에 띄는 럭셔리 황금빛 글자' },
+      { id: 'textcolor-neonpink', category: 'textcolor', name: '핫핑크 네온 💖', textStyleClass: 'text-pink-600 font-black', priceType: 'kbo', price: 200, desc: '강렬하게 비치는 핫핑크 네온 폰트' },
+      { id: 'textcolor-emerald', category: 'textcolor', name: '에메랄드 그린 💚', textStyleClass: 'text-emerald-600 font-bold', priceType: 'kbo', price: 180, desc: '싱그럽고 또렷한 에메랄드 폰트' },
+      { id: 'textcolor-violet', category: 'textcolor', name: '크리스탈 바이올렛 🔮', textStyleClass: 'text-purple-700 font-black', priceType: 'kebo', price: 3, desc: '고급스러운 신비의 보라빛 글자' }
+    ];
+
+    let currentUser = null;
+    let selectedTeam = KBO_TEAMS[0];
+    let equippedFrameId = 'frame-none';
+    let equippedBgId = 'bg-default';
+    let equippedTextColorId = 'textcolor-default';
+    let ownedItemIds = ['frame-none', 'bg-default', 'textcolor-default'];
+
+    function showAlert(title, msg, icon = '⚾') {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalMsg').innerText = msg;
+      document.getElementById('modalIcon').innerText = icon;
+      document.getElementById('appModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('appModal').classList.add('hidden');
+    }
+
+    let userCurrency = {
+      kbo: 150,
+      kebo: 0
+    };
+
+    function getLeaderboardData() {
+      const saved = localStorage.getItem('kbo_arcade_leaderboard');
+      if (!saved) return { homerun: [], running: [], quiz: [], memory: [] };
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return { homerun: [], running: [], quiz: [], memory: [] };
+      }
+    }
+
+    function recordHumanPlayScore(category, rawScore, displayValue) {
+      const playerName = currentUser ? currentUser.email : (document.getElementById('playerName')?.value || '야구 타자');
+      const data = getLeaderboardData();
+
+      if (!data[category]) data[category] = [];
+
+      const existingIndex = data[category].findIndex(item => item.name === playerName);
+
+      if (existingIndex !== -1) {
+        const existingRecord = data[category][existingIndex];
+        let isBetter = false;
+
+        if (category === 'running' || category === 'memory') {
+          if (rawScore < existingRecord.score) isBetter = true;
+        } else {
+          if (rawScore > existingRecord.score) isBetter = true;
+        }
+
+        if (isBetter) {
+          data[category][existingIndex] = {
+            name: playerName,
+            team: selectedTeam,
+            frame: equippedFrameId,
+            score: rawScore,
+            display: displayValue,
+            date: new Date().toISOString().slice(0, 10).replace(/-/g, '.')
+          };
+        }
+      } else {
+        data[category].push({
+          name: playerName,
+          team: selectedTeam,
+          frame: equippedFrameId,
+          score: rawScore,
+          display: displayValue,
+          date: new Date().toISOString().slice(0, 10).replace(/-/g, '.')
+        });
+      }
+
+      if (category === 'running' || category === 'memory') {
+        data[category].sort((a, b) => a.score - b.score);
+      } else {
+        data[category].sort((a, b) => b.score - a.score);
+      }
+
+      data[category] = data[category].slice(0, 10);
+      localStorage.setItem('kbo_arcade_leaderboard', JSON.stringify(data));
+      renderLeaderboard(currentLeaderboardTab);
+    }
+
+    let currentLeaderboardTab = 'homerun';
+
+    function renderLeaderboard(category = currentLeaderboardTab) {
+      currentLeaderboardTab = category;
+
+      ['homerun', 'running', 'quiz', 'memory'].forEach(cat => {
+        const btn = document.getElementById(`lbBtn-${cat}`);
+        if (btn) {
+          if (cat === category) {
+            btn.className = "px-3 py-1 rounded-xl font-bold bg-purple-500 text-white shadow-sm";
+          } else {
+            btn.className = "px-3 py-1 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-purple-100";
+          }
+        }
+      });
+
+      const data = getLeaderboardData()[category] || [];
+      const listEl = document.getElementById('leaderboardList');
+      if (!listEl) return;
+
+      if (data.length === 0) {
+        listEl.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400 text-[11px] font-semibold">등록된 기록이 없습니다. 게임에 도전하여 첫 기록을 세워보세요!</td></tr>`;
+        return;
+      }
+
+      const medals = ['🥇 1위', '🥈 2위', '🥉 3위', '4위', '5위', '6위', '7위', '8위', '9위', '10위'];
+      const rewardBadges = ['🎁 +500⚾ +10💎', '🎁 +300⚾ +5💎', '🎁 +100⚾ +3💎', '-', '-', '-', '-', '-', '-', '-'];
+
+      let html = '';
+      data.forEach((item, index) => {
+        const rankText = medals[index] || `${index+1}위`;
+        const rewardText = rewardBadges[index] || '-';
+        const teamBg = item.team ? item.team.bg : '#8b5cf6';
+        const teamIcon = item.team ? item.team.icon : '⚾';
+        const teamName = item.team ? item.team.name : 'KBO 팬';
+        const itemFrameClass = item.frame || 'frame-none';
+
+        html += `
+          <tr class="hover:bg-purple-50/40 font-medium">
+            <td class="p-2.5 text-center font-bold text-slate-800 text-xs">${rankText}</td>
+            <td class="p-2.5 font-bold text-slate-900">
+              <div class="flex items-center gap-1.5">
+                <div class="avatar-circle w-6 h-6 ${itemFrameClass} text-[10px]" style="background:${teamBg}; color:white;">
+                  <span>${teamIcon}</span>
+                </div>
+                <span>${item.name}</span>
+              </div>
+            </td>
+            <td class="p-2.5">
+              <span class="inline-flex items-center gap-1 text-[9px] font-bold text-white px-2 py-0.5 rounded-full" style="background:${teamBg}">
+                <span>${teamIcon}</span> ${teamName}
+              </span>
+            </td>
+            <td class="p-2.5 text-right font-black text-purple-600 text-xs md:text-sm">${item.display}</td>
+            <td class="p-2.5 text-center text-amber-600 font-extrabold text-[10px]">${rewardText}</td>
+          </tr>
+        `;
+      });
+
+      listEl.innerHTML = html;
+    }
+
+    function getGuestbookData() {
+      const saved = localStorage.getItem('kbo_arcade_guestbook');
+      if (!saved) return [];
+      try { return JSON.parse(saved); } catch (e) { return []; }
+    }
+
+    function saveGuestbookData(data) {
+      localStorage.setItem('kbo_arcade_guestbook', JSON.stringify(data));
+    }
+
+    function submitGuestbook() {
+      const msgInput = document.getElementById('guestbookMsg');
+      const msg = msgInput.value.trim();
+      if (!msg) return showAlert('안내', '방명록 내용을 입력해주세요!', '⚠️');
+
+      const data = getGuestbookData();
+      const pName = currentUser ? currentUser.email : (document.getElementById('playerName')?.value || '무명타자');
+
+      const newEntry = {
+        id: 'gb_' + Date.now(),
+        name: pName,
+        team: selectedTeam,
+        frame: equippedFrameId,
+        textColor: equippedTextColorId,
+        msg: msg,
+        likes: 0,
+        likedUsers: [],
+        date: new Date().toISOString().slice(0, 10).replace(/-/g, '.') + ' ' + new Date().toTimeString().slice(0, 5)
+      };
+
+      data.unshift(newEntry);
+      saveGuestbookData(data);
+      msgInput.value = '';
+      renderGuestbookUI();
+      showAlert('성공', '방명록이 등록되었습니다! ✍🏻', '✍🏻');
+    }
+
+    function deleteGuestbook(id) {
+      let data = getGuestbookData();
+      data = data.filter(item => item.id !== id);
+      saveGuestbookData(data);
+      renderGuestbookUI();
+      showAlert('삭제 완료', '방명록이 삭제되었습니다.', '🗑️');
+    }
+
+    function toggleLikeGuestbook(id) {
+      const data = getGuestbookData();
+      const entry = data.find(item => item.id === id);
+      if (!entry) return;
+
+      const pName = currentUser ? currentUser.email : (document.getElementById('playerName')?.value || 'Guest');
+      if (!entry.likedUsers) entry.likedUsers = [];
+
+      const index = entry.likedUsers.indexOf(pName);
+      if (index !== -1) {
+        return showAlert('안내', '이미 공감(❤️)한 방명록입니다! (1인당 1개만 가능)', '💡');
+      } else {
+        entry.likedUsers.push(pName);
+        entry.likes = (entry.likes || 0) + 1;
+        saveGuestbookData(data);
+        renderGuestbookUI();
+      }
+    }
+
+    function renderGuestbookUI() {
+      const container = document.getElementById('guestbookList');
+      if (!container) return;
+
+      const data = getGuestbookData();
+      const currentUserName = currentUser ? currentUser.email : (document.getElementById('playerName')?.value || '무명타자');
+
+      if (data.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-[11px] font-semibold">아직 등록된 방명록이 없습니다. 첫 방명록의 주인공이 되어보세요!</div>`;
+        return;
+      }
+
+      let html = '';
+      data.forEach(item => {
+        const teamBg = item.team ? item.team.bg : '#8b5cf6';
+        const teamIcon = item.team ? item.team.icon : '⚾';
+        const teamName = item.team ? item.team.name : 'KBO 팬';
+        const itemFrameClass = item.frame || 'frame-none';
+
+        const textColorObj = AVATAR_ITEMS.find(i => i.id === (item.textColor || 'textcolor-default')) || AVATAR_ITEMS.find(i => i.id === 'textcolor-default');
+        const textCss = textColorObj.textStyleClass || 'text-slate-700';
+
+        const isMyPost = (item.name === currentUserName);
+        const likesCount = item.likes || 0;
+
+        html += `
+          <div class="p-2.5 bg-white border border-purple-100 rounded-2xl shadow-sm hover:border-purple-300 transition relative">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-1.5">
+                <div class="avatar-circle w-6 h-6 ${itemFrameClass} text-[10px]" style="background:${teamBg}; color:white">
+                  <span>${teamIcon}</span>
+                </div>
+                <span class="font-extrabold text-[11px] text-slate-800">${item.name}</span>
+                <span class="text-[8px] font-bold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded-full border border-purple-100">${teamName}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9px] text-slate-400">${item.date}</span>
+                ${isMyPost ? `<button onclick="deleteGuestbook('${item.id}')" class="text-slate-400 hover:text-rose-500 font-bold text-xs" title="본인 글 삭제">✕</button>` : ''}
+              </div>
+            </div>
+            <p class="text-[11px] pl-0.5 my-1.5 ${textCss}">${item.msg}</p>
+
+            <div class="flex items-center justify-end mt-1 pt-1 border-t border-slate-50">
+              <button onclick="toggleLikeGuestbook('${item.id}')" class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold text-[10px] transition">
+                <span>❤️ 공감</span>
+                <span class="font-black">${likesCount}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function initApp() {
+      loadAvatarInventory();
+      loadCurrency();
+      checkSavedUser();
+      renderTeamSelector();
+      renderAvatarCustomizationView();
+      renderAvatarShop();
+      renderGuestbookUI();
+      renderLeaderboard('homerun');
+      updateAllAvatarUI();
+    }
+
+    function loadAvatarInventory() {
+      const savedOwned = localStorage.getItem('kbo_arcade_owned_items');
+      const savedFrame = localStorage.getItem('kbo_arcade_equipped_frame');
+      const savedBg = localStorage.getItem('kbo_arcade_equipped_bg');
+      const savedText = localStorage.getItem('kbo_arcade_equipped_textcolor');
+
+      if (savedOwned) {
+        try { ownedItemIds = JSON.parse(savedOwned); } catch (e) { ownedItemIds = ['frame-none', 'bg-default', 'textcolor-default']; }
+      }
+      if (savedFrame) equippedFrameId = savedFrame;
+      if (savedBg) equippedBgId = savedBg;
+      if (savedText) equippedTextColorId = savedText;
+    }
+
+    function saveAvatarInventory() {
+      localStorage.setItem('kbo_arcade_owned_items', JSON.stringify(ownedItemIds));
+      localStorage.setItem('kbo_arcade_equipped_frame', equippedFrameId);
+      localStorage.setItem('kbo_arcade_equipped_bg', equippedBgId);
+      localStorage.setItem('kbo_arcade_equipped_textcolor', equippedTextColorId);
+      updateAllAvatarUI();
+    }
+
+    function checkSavedUser() {
+      const saved = localStorage.getItem('kbo_arcade_user');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          document.getElementById('loginBox').classList.add('hidden');
+          document.getElementById('userBar').classList.remove('hidden');
+          document.getElementById('userAccountText').innerText = currentUser.email;
+          document.getElementById('playerName').value = currentUser.email;
+          if (currentUser.team) {
+            const found = KBO_TEAMS.find(t => t.id === currentUser.team.id);
+            if (found) selectedTeam = found;
+          }
+          document.getElementById('userTeamBadge').innerText = selectedTeam.name;
+        } catch (e) {}
+      }
+      updateAllAvatarUI();
+    }
+
+    function updateAllAvatarUI() {
+      const frameObj = AVATAR_ITEMS.find(f => f.id === equippedFrameId) || AVATAR_ITEMS[0];
+      const bgObj = AVATAR_ITEMS.find(b => b.id === equippedBgId) || AVATAR_ITEMS.find(b => b.id === 'bg-default');
+
+      // Update User Bar Preview
+      const barAv = document.getElementById('userBarAvatar');
+      if (barAv) {
+        barAv.className = `avatar-circle w-7 h-7 ${frameObj.cssClass} text-xs`;
+        barAv.style.background = selectedTeam.bg;
+        barAv.style.color = 'white';
+        barAv.innerHTML = `<span>${selectedTeam.icon}</span>`;
+      }
+
+      // Update Selection Tab Live Preview
+      const selCircle = document.getElementById('previewAvatarCircle');
+      if (selCircle) {
+        selCircle.className = `avatar-circle w-20 h-20 ${frameObj.cssClass} text-3xl`;
+        selCircle.style.background = selectedTeam.bg;
+        selCircle.style.color = 'white';
+        selCircle.innerHTML = `<span>${selectedTeam.icon}</span>`;
+      }
+
+      const previewCard = document.getElementById('previewCard');
+      if (previewCard && bgObj) {
+        if (bgObj.isStadium) {
+          previewCard.className = "p-4 rounded-2xl border text-center mb-5 max-w-sm mx-auto shadow-sm transition-all duration-300 stadium-bg-style";
+          previewCard.style.backgroundImage = '';
+          previewCard.style.background = '';
+        } else {
+          previewCard.className = "p-4 rounded-2xl border text-center mb-5 max-w-sm mx-auto shadow-sm transition-all duration-300 bg-cover bg-center";
+          previewCard.style.backgroundImage = 'none';
+          previewCard.style.background = bgObj.styleBg;
+        }
+      }
+
+      const selTeamName = document.getElementById('previewTeamName');
+      if (selTeamName) selTeamName.innerText = selectedTeam.name;
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!email) return showAlert('안내', '닉네임을 입력하세요!', '⚠');
+
+      currentUser = {
+        email: email,
+        team: selectedTeam
+      };
+
+      localStorage.setItem('kbo_arcade_user', JSON.stringify(currentUser));
+      checkSavedUser();
+      renderGuestbookUI();
+      showAlert('저장 완료', '프로필 정보가 업데이트되었습니다!', '✨');
+    }
+
+    function logout() {
+      localStorage.removeItem('kbo_arcade_user');
+      currentUser = null;
+      document.getElementById('loginBox').classList.remove('hidden');
+      document.getElementById('userBar').classList.add('hidden');
+      updateAllAvatarUI();
+      renderGuestbookUI();
+      showAlert('로그아웃', '로그아웃 되었습니다.', '👋');
+    }
+
+    function changeNickname() {
+      const newNick = prompt('새로운 닉네임을 입력하세요:', currentUser ? currentUser.email : '');
+      if (newNick && newNick.trim()) {
+        currentUser.email = newNick.trim();
+        document.getElementById('playerName').value = currentUser.email;
+        localStorage.setItem('kbo_arcade_user', JSON.stringify(currentUser));
+        checkSavedUser();
+        renderGuestbookUI();
+      }
+    }
+
+    function loadCurrency() {
+      const saved = localStorage.getItem('kbo_arcade_currency');
+      if (saved) {
+        try { userCurrency = { ...userCurrency, ...JSON.parse(saved) }; } catch (e) {}
+      }
+      updateCurrencyUI();
+    }
+
+    function saveCurrency() {
+      localStorage.setItem('kbo_arcade_currency', JSON.stringify(userCurrency));
+      updateCurrencyUI();
+    }
+
+    function updateCurrencyUI() {
+      const kboEl = document.getElementById('displayKbo');
+      const keboEl = document.getElementById('displayKebo');
+      if (kboEl) kboEl.innerText = userCurrency.kbo;
+      if (keboEl) keboEl.innerText = userCurrency.kebo;
+    }
+
+    function grantReward(kboAmount, keboChance = 2 / 3, gameName = '게임') {
+      userCurrency.kbo += kboAmount;
+      saveCurrency();
+
+      let rewardMsg = `🎉 ${gameName} 완료!\n획득 보상: +${kboAmount} 크보(⚾)`;
+      showAlert('보상 획득 완료!', rewardMsg, '🎁');
+
+      setTimeout(() => {
+        openLuckyDrawModal();
+      }, 1200);
+    }
+
+    function openLuckyDrawModal() {
+      const grid = document.getElementById('drawPaperGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      for (let i = 0; i < 6; i++) {
+        const paper = document.createElement('div');
+        paper.className = 'draw-paper py-4 px-2 flex flex-col items-center justify-center text-center shadow-sm';
+        paper.innerHTML = `<span class="text-2xl mb-1">📜</span><span class="text-[10px] font-bold text-amber-900">뽑기 종이 ${i+1}</span>`;
+        paper.onclick = () => selectLuckyPaper(paper);
+        grid.appendChild(paper);
+      }
+
+      document.getElementById('drawModal').classList.remove('hidden');
+    }
+
+    function closeDrawModal() {
+      document.getElementById('drawModal').classList.add('hidden');
+    }
+
+    function selectLuckyPaper(paperEl) {
+      const keboWon = Math.floor(Math.random() * 3) + 1;
+      userCurrency.kebo += keboWon;
+      saveCurrency();
+
+      paperEl.innerHTML = `<span class="text-2xl mb-1">💎</span><span class="text-[10px] font-extrabold text-cyan-800">+${keboWon} 케보!</span>`;
+      paperEl.className = "bg-cyan-100 border-2 border-cyan-400 rounded-xl py-4 px-2 text-center animate-bounce";
+
+      const allPapers = document.querySelectorAll('.draw-paper');
+      allPapers.forEach(p => p.onclick = null);
+
+      setTimeout(() => {
+        showAlert('축하합니다!', `미니 뽑기 종이에서 💎 케보 ${keboWon}개를 획득하셨습니다!`, '💎');
+        closeDrawModal();
+      }, 1000);
+    }
+
+    function switchTab(tab) {
+      ['halli', 'memory', 'quiz', 'homerun', 'running', 'avatarselect', 'avatarshop', 'leaderboard', 'guestbook'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        const sec = document.getElementById(`sec-${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] transition-all bg-purple-500 text-white shadow-sm";
+          if (sec) sec.classList.remove('hidden');
+        } else {
+          btn.className = "flex-1 py-1.5 px-1.5 rounded-xl font-bold text-[10px] md:text-[11px] text-slate-600 hover:bg-pink-50 transition-all";
+          if (sec) sec.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'avatarselect') renderAvatarCustomizationView();
+      if (tab === 'avatarshop') renderAvatarShop();
+      if (tab === 'guestbook') renderGuestbookUI();
+      if (tab === 'leaderboard') renderLeaderboard(currentLeaderboardTab);
+    }
+
+    function renderTeamSelector() {
+      const container = document.getElementById('teamSelector');
+      if (!container) return;
+      container.innerHTML = '';
+      KBO_TEAMS.forEach(team => {
+        const card = document.createElement('div');
+        card.className = `team-card ${team.id === selectedTeam.id ? 'selected' : ''}`;
+        card.innerText = team.icon;
+        card.title = team.name;
+        card.onclick = () => {
+          selectedTeam = team;
+          renderTeamSelector();
+          if (currentUser) {
+            currentUser.team = selectedTeam;
+            document.getElementById('userTeamBadge').innerText = selectedTeam.name;
+            localStorage.setItem('kbo_arcade_user', JSON.stringify(currentUser));
+          }
+          updateAllAvatarUI();
+        };
+        container.appendChild(card);
+      });
+    }
+
+    // --- Avatar Customization / Selection Tab Logic ---
+    function renderAvatarCustomizationView() {
+      updateAllAvatarUI();
+
+      // Render Owned Items
+      const framesContainer = document.getElementById('ownedFramesList');
+      if (framesContainer) {
+        framesContainer.innerHTML = '';
+        AVATAR_ITEMS.forEach(item => {
+          const isOwned = ownedItemIds.includes(item.id);
+          if (!isOwned) return;
+
+          let isEquipped = false;
+          if (item.category === 'frame') isEquipped = (equippedFrameId === item.id);
+          else if (item.category === 'bg') isEquipped = (equippedBgId === item.id);
+          else if (item.category === 'textcolor') isEquipped = (equippedTextColorId === item.id);
+
+          const card = document.createElement('div');
+          card.className = `p-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-between ${
+            isEquipped ? 'border-purple-500 bg-purple-50/80 shadow-md ring-2 ring-purple-400' : 'border-purple-100 bg-white hover:border-purple-300'
+          }`;
+
+          let visualHTML = '';
+          if (item.category === 'frame') {
+            visualHTML = `
+              <div class="avatar-circle w-10 h-10 ${item.cssClass} text-base" style="background:${selectedTeam.bg}; color:white;">
+                <span>${selectedTeam.icon}</span>
+              </div>
+            `;
+          } else if (item.category === 'bg') {
+            if (item.isStadium) {
+              visualHTML = `<div class="w-10 h-10 rounded-xl border border-slate-200 shadow-inner stadium-bg-style"></div>`;
+            } else {
+              visualHTML = `<div class="w-10 h-10 rounded-xl border border-slate-200 shadow-inner bg-cover bg-center" style="background:${item.styleBg}"></div>`;
+            }
+          } else if (item.category === 'textcolor') {
+            visualHTML = `<div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-extrabold text-sm ${item.textStyleClass}">Aa</div>`;
+          }
+
+          card.innerHTML = `
+            <div class="my-1.5 flex items-center justify-center">
+              ${visualHTML}
+            </div>
+            <div class="font-extrabold text-[11px] text-slate-800 leading-snug">${item.name}</div>
+            <div class="text-[9px] text-slate-500 my-1">${item.desc}</div>
+            <button onclick="equipItem('${item.id}')" class="w-full mt-1 py-1 rounded-xl font-bold text-[10px] ${
+              isEquipped ? 'bg-purple-600 text-white shadow-sm' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+            }">
+              ${isEquipped ? '✓ 장착중' : '장착하기'}
+            </button>
+          `;
+          framesContainer.appendChild(card);
+        });
+      }
+
+      // Render Team Selector Grid in Selection View
+      const teamGrid = document.getElementById('avatarSelectTeamGrid');
+      if (teamGrid) {
+        teamGrid.innerHTML = '';
+        KBO_TEAMS.forEach(team => {
+          const isSelected = (team.id === selectedTeam.id);
+          const item = document.createElement('div');
+          item.className = `p-2 rounded-2xl text-center cursor-pointer transition border ${
+            isSelected ? 'border-purple-500 bg-purple-50 shadow-sm' : 'border-slate-200 bg-white hover:border-purple-300'
+          }`;
+          item.onclick = () => {
+            selectedTeam = team;
+            if (currentUser) {
+              currentUser.team = selectedTeam;
+              localStorage.setItem('kbo_arcade_user', JSON.stringify(currentUser));
+            }
+            renderTeamSelector();
+            renderAvatarCustomizationView();
+          };
+
+          item.innerHTML = `
+            <div class="w-8 h-8 rounded-full mx-auto flex items-center justify-center text-sm shadow-inner mb-1" style="background:${team.bg}; color:white;">
+              ${team.icon}
+            </div>
+            <div class="text-[9px] font-bold text-slate-700 truncate">${team.name}</div>
+          `;
+          teamGrid.appendChild(item);
+        });
+      }
+    }
+
+    function equipItem(itemId) {
+      if (!ownedItemIds.includes(itemId)) return;
+      const item = AVATAR_ITEMS.find(i => i.id === itemId);
+      if (!item) return;
+
+      if (item.category === 'frame') equippedFrameId = itemId;
+      else if (item.category === 'bg') equippedBgId = itemId;
+      else if (item.category === 'textcolor') equippedTextColorId = itemId;
+
+      saveAvatarInventory();
+      renderAvatarCustomizationView();
+      renderGuestbookUI();
+      showAlert('장착 완료', '선택한 아이템이 적용되었습니다!', '✨');
+    }
+
+    // --- Item Shop Logic (구매 시 자동 장착 제외) ---
+    function renderAvatarShop() {
+      const grid = document.getElementById('avatarShopGrid');
+      if (!grid) return;
+
+      grid.innerHTML = '';
+      AVATAR_ITEMS.forEach(item => {
+        const isOwned = ownedItemIds.includes(item.id);
+
+        const card = document.createElement('div');
+        card.className = "p-3 bg-white border border-purple-100 rounded-2xl shadow-sm hover:border-purple-300 transition flex items-center gap-3";
+
+        const currencySymbol = item.priceType === 'kbo' ? '⚾' : '💎';
+        const priceLabel = item.price === 0 ? '기본 제공' : `${currencySymbol} ${item.price}`;
+
+        let visualHTML = '';
+        if (item.category === 'frame') {
+          visualHTML = `
+            <div class="avatar-circle w-12 h-12 ${item.cssClass} text-xl flex-shrink-0" style="background:${selectedTeam.bg}; color:white;">
+              <span>${selectedTeam.icon}</span>
+            </div>
+          `;
+        } else if (item.category === 'bg') {
+          if (item.isStadium) {
+            visualHTML = `<div class="w-12 h-12 rounded-2xl border border-slate-200 shadow-inner flex-shrink-0 stadium-bg-style"></div>`;
+          } else {
+            visualHTML = `<div class="w-12 h-12 rounded-2xl border border-slate-200 shadow-inner flex-shrink-0 bg-cover bg-center" style="background:${item.styleBg}"></div>`;
+          }
+        } else if (item.category === 'textcolor') {
+          visualHTML = `<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-base flex-shrink-0 ${item.textStyleClass}">Aa</div>`;
+        }
+
+        card.innerHTML = `
+          ${visualHTML}
+          <div class="flex-1 min-w-0">
+            <h4 class="font-extrabold text-xs text-slate-800 leading-snug">${item.name}</h4>
+            <p class="text-[10px] text-slate-500 leading-normal mt-0.5">${item.desc}</p>
+            <div class="text-[11px] font-black text-amber-600 mt-1">${priceLabel}</div>
+          </div>
+          <div>
+            ${
+              isOwned ?
+                `<button disabled class="px-3 py-1.5 rounded-xl font-bold text-[10px] bg-slate-100 text-slate-400 cursor-not-allowed">
+                  보유중
+                </button>` :
+                `<button onclick="buyAvatarItem('${item.id}')" class="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white font-bold text-[10px] rounded-xl shadow-sm">
+                  구매하기
+                </button>`
+            }
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function buyAvatarItem(itemId) {
+      const item = AVATAR_ITEMS.find(f => f.id === itemId);
+      if (!item) return;
+
+      if (ownedItemIds.includes(itemId)) {
+        return showAlert('안내', '이미 보유한 아이템입니다!', '💡');
+      }
+
+      if (item.priceType === 'kbo') {
+        if (userCurrency.kbo < item.price) {
+          return showAlert('잔액 부족', `크보(⚾)가 부족합니다! (필요: ${item.price} 크보)`, '⚠️');
+        }
+        userCurrency.kbo -= item.price;
+      } else {
+        if (userCurrency.kebo < item.price) {
+          return showAlert('잔액 부족', `케보(💎)가 부족합니다! (필요: ${item.price} 케보)`, '⚠️');
+        }
+        userCurrency.kebo -= item.price;
+      }
+
+      ownedItemIds.push(itemId);
+      saveCurrency();
+      saveAvatarInventory();
+
+      renderAvatarShop();
+      renderAvatarCustomizationView();
+      showAlert('구매 완료!', `'${item.name}' 아이템을 구매했습니다! 아바타 설정 탭에서 장착해 보세요.`, '🎁');
+    }
+
+    // --- Game 1: Yalli Galli Logic ---
+    let halliGameState = { players: [], currentTurn: 0, timer: null, mode: 'ai', roomCode: '' };
+
+    function toggleMultiplayerInput() {
+      const mode = document.getElementById('gameMode').value;
+      const roomGroup = document.getElementById('roomCodeGroup');
+      const countGroup = document.getElementById('countGroup');
+      if (mode === 'multi') {
+        roomGroup.classList.remove('hidden');
+        countGroup.classList.add('hidden');
+      } else {
+        roomGroup.classList.add('hidden');
+        countGroup.classList.remove('hidden');
+      }
+    }
+
+    function initGame() {
+      const mode = document.getElementById('gameMode').value;
+      const pName = document.getElementById('playerName').value || '홈런왕';
+      
+      halliGameState.mode = mode;
+
+      if (mode === 'multi') {
+        const code = document.getElementById('roomCodeInput').value.trim();
+        if (!code || code.length < 3) {
+          return showAlert('안내', '4자리 방 번호를 입력해주세요! (예: 1234)', '⚠️');
+        }
+        halliGameState.roomCode = code;
+      }
+
+      const count = (mode === 'multi') ? 4 : parseInt(document.getElementById('playerCount').value);
+      const deck = createHalliDeck();
+      shuffle(deck);
+
+      halliGameState.players = [];
+      const perPlayer = Math.floor(deck.length / count);
+
+      for (let i = 0; i < count; i++) {
+        const isHuman = (i === 0);
+        let playerNameStr = isHuman ? pName : `AI 타자 ${i}`;
+        if (mode === 'multi' && !isHuman) {
+          playerNameStr = `방[${halliGameState.roomCode}] 참가자 ${i+1}`;
+        }
+
+        halliGameState.players.push({
+          id: i,
+          name: playerNameStr,
+          isHuman: isHuman,
+          deck: deck.slice(i * perPlayer, (i + 1) * perPlayer),
+          currentCard: null
+        });
+      }
+
+      halliGameState.currentTurn = 0;
+      document.getElementById('setupPanel').classList.add('hidden');
+      document.getElementById('gamePanel').classList.remove('hidden');
+
+      renderHalliBoard();
+      
+      if (mode === 'multi') {
+        updateHalliStatus(`🌐 방 번호 [${halliGameState.roomCode}] 멀티 대전 시작! ${halliGameState.players[0].name}님의 차례입니다.`);
+      } else {
+        updateHalliStatus(`게임을 시작합니다! ${halliGameState.players[0].name}님의 차례입니다.`);
+      }
+      
+      startAILoop();
+    }
+
+    function createHalliDeck() {
+      const icons = ['⚾', '🏏', '🧢', '🥊'];
+      const deck = [];
+      icons.forEach(icon => {
+        [1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5].forEach(num => {
+          deck.push({ icon, count: num });
+        });
+      });
+      return deck;
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function renderHalliBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+
+      const frameObj = AVATAR_ITEMS.find(f => f.id === equippedFrameId) || AVATAR_ITEMS[0];
+
+      halliGameState.players.forEach((p, idx) => {
+        const isTurn = idx === halliGameState.currentTurn;
+        const zone = document.createElement('div');
+        zone.className = `player-zone ${isTurn ? 'active-turn' : ''} ${p.isHuman ? 'me' : ''}`;
+
+        let cardHTML = '';
+        if (p.currentCard) {
+          let iconsStr = '';
+          for (let c = 0; c < p.currentCard.count; c++) {
+            iconsStr += `<span class="text-sm md:text-base">${p.currentCard.icon}</span>`;
+          }
+          cardHTML = `<div class="card-halli">${iconsStr}</div>`;
+        } else {
+          cardHTML = `<div class="card-halli card-back">⚾</div>`;
+        }
+
+        const avatarClass = p.isHuman ? frameObj.cssClass : 'frame-none';
+
+        zone.innerHTML = `
+          <div class="player-info">
+            <div class="avatar-circle w-7 h-7 ${avatarClass} text-xs" style="background:${selectedTeam.bg}; color:white"><span>${selectedTeam.icon}</span></div>
+            <span class="font-bold text-xs md:text-sm text-slate-800">${p.name}</span>
+          </div>
+          <div class="text-[10px] text-slate-500 font-bold mb-1">남은 카드: ${p.deck.length}장</div>
+          ${cardHTML}
+          ${p.isHuman && isTurn ? `<button onclick="playTurn()" class="mt-2 px-3 py-1 bg-purple-600 text-white font-bold text-xs rounded-xl shadow">카드 뒤집기</button>` : ''}
+        `;
+        board.appendChild(zone);
+      });
+
+      document.getElementById('turnInfo').innerText = `현재 순서: ${halliGameState.players[halliGameState.currentTurn].name}`;
+    }
+
+    function playTurn() {
+      const p = halliGameState.players[halliGameState.currentTurn];
+      if (p.deck.length === 0) { nextHalliTurn(); return; }
+      p.currentCard = p.deck.pop();
+      renderHalliBoard();
+      nextHalliTurn();
+    }
+
+    function nextHalliTurn() {
+      let activeCount = halliGameState.players.filter(p => p.deck.length > 0 || p.currentCard !== null).length;
+      if (activeCount <= 1) {
+        const winner = halliGameState.players.find(p => p.deck.length > 0 || p.currentCard !== null) || halliGameState.players[0];
+        updateHalliStatus(`🏆 게임 종료! 승리자: ${winner.name}`);
+        if (winner.isHuman) grantReward(200, 0.7, '얄리갈리 승리');
+        return;
+      }
+
+      do {
+        halliGameState.currentTurn = (halliGameState.currentTurn + 1) % halliGameState.players.length;
+      } while (halliGameState.players[halliGameState.currentTurn].deck.length === 0 && halliGameState.players[halliGameState.currentTurn].currentCard === null);
+
+      renderHalliBoard();
+    }
+
+    function startAILoop() {
+      if (halliGameState.timer) clearInterval(halliGameState.timer);
+      halliGameState.timer = setInterval(() => {
+        const curr = halliGameState.players[halliGameState.currentTurn];
+        if (curr && !curr.isHuman) {
+          playTurn();
+          checkAIBell();
+        }
+      }, 2500);
+    }
+
+    function checkAIBell() {
+      if (canRingBell() && Math.random() < 0.4) {
+        const aiPlayer = halliGameState.players.find(p => !p.isHuman);
+        if (aiPlayer) {
+          updateHalliStatus(`🔔 ${aiPlayer.name}가 종을 쳤습니다!`);
+          collectCards(aiPlayer);
+        }
+      }
+    }
+
+    function canRingBell() {
+      const totals = {};
+      halliGameState.players.forEach(p => {
+        if (p.currentCard) {
+          totals[p.currentCard.icon] = (totals[p.currentCard.icon] || 0) + p.currentCard.count;
+        }
+      });
+      return Object.values(totals).includes(5);
+    }
+
+    function ringBell() {
+      const me = halliGameState.players[0];
+      if (canRingBell()) {
+        updateHalliStatus(`🔔 정답! ${me.name}님이 종을 쳐서 모든 카드를 획득했습니다!`);
+        collectCards(me);
+        grantReward(50, 0.3, '얄리갈리 명종 통과');
+      } else {
+        updateHalliStatus(`❌ 종을 잘못 쳤습니다! 벌칙 적용.`);
+      }
+    }
+
+    function collectCards(winner) {
+      halliGameState.players.forEach(p => {
+        if (p.currentCard) {
+          winner.deck.unshift(p.currentCard);
+          p.currentCard = null;
+        }
+      });
+      renderHalliBoard();
+    }
+
+    function updateHalliStatus(msg) {
+      document.getElementById('msg').innerText = msg;
+    }
+
+    function resetHalliGame() {
+      if (halliGameState.timer) clearInterval(halliGameState.timer);
+      document.getElementById('gamePanel').classList.add('hidden');
+      document.getElementById('setupPanel').classList.remove('hidden');
+    }
+
+    // --- Game 2: Memory Card Logic ---
+    let memState = { cards: [], flipped: [], matchedCount: 0, totalPairs: 8, moves: 0, timer: null, seconds: 0 };
+
+    const BASEBALL_CARDS = [
+      { id: 'b1', name: '두산 베어스', icon: '🐻' },
+      { id: 'b2', name: '한화 이글스', icon: '🦅' },
+      { id: 'b3', name: 'SSG 랜더스', icon: '🐶' },
+      { id: 'b4', name: '삼성 라이온즈', icon: '🦁' },
+      { id: 'b5', name: 'LG 트윈스', icon: '⚾' },
+      { id: 'b6', name: '롯데 자이언츠', icon: '⚓' },
+      { id: 'b7', name: '키움 히어로즈', icon: '🦸' },
+      { id: 'b8', name: 'NC 다이노스', icon: '🦖' },
+      { id: 'b9', name: 'kt wiz', icon: '🧙' },
+      { id: 'b10', name: 'KIA 타이거즈', icon: '🐯' }
+    ];
+
+    function startMemoryGame() {
+      const diff = document.getElementById('memDifficulty').value;
+      if (diff === 'easy') memState.totalPairs = 6;
+      else if (diff === 'normal') memState.totalPairs = 8;
+      else memState.totalPairs = 10;
+
+      const selected = BASEBALL_CARDS.slice(0, memState.totalPairs);
+      const deck = [...selected, ...selected];
+      shuffle(deck);
+
+      memState.cards = deck.map((item, index) => ({
+        index,
+        ...item,
+        isFlipped: false,
+        isMatched: false
+      }));
+
+      memState.flipped = [];
+      memState.matchedCount = 0;
+      memState.moves = 0;
+      memState.seconds = 0;
+
+      document.getElementById('memMoves').innerText = '0';
+      document.getElementById('memPairs').innerText = `0 / ${memState.totalPairs}`;
+      document.getElementById('memTimer').innerText = '00:00';
+      document.getElementById('memBest').innerText = '진행중';
+
+      document.getElementById('memSetup').classList.add('hidden');
+      document.getElementById('memPlay').classList.remove('hidden');
+
+      renderMemoryGrid();
+      startMemTimer();
+    }
+
+    function startMemTimer() {
+      if (memState.timer) clearInterval(memState.timer);
+      memState.timer = setInterval(() => {
+        memState.seconds++;
+        const mins = String(Math.floor(memState.seconds / 60)).padStart(2, '0');
+        const secs = String(memState.seconds % 60).padStart(2, '0');
+        document.getElementById('memTimer').innerText = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function renderMemoryGrid() {
+      const grid = document.getElementById('memoryGrid');
+      grid.innerHTML = '';
+
+      memState.cards.forEach((card, idx) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `mem-card ${card.isFlipped || card.isMatched ? 'flipped' : ''}`;
+        cardEl.onclick = () => flipMemCard(idx);
+
+        cardEl.innerHTML = `
+          <div class="mem-card-inner">
+            <div class="mem-card-front">⚾</div>
+            <div class="mem-card-back">
+              <span class="text-xl md:text-2xl mb-0.5">${card.icon}</span>
+              <span class="text-[9px] font-bold text-slate-700">${card.name}</span>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(cardEl);
+      });
+    }
+
+    function flipMemCard(idx) {
+      const card = memState.cards[idx];
+      if (card.isFlipped || card.isMatched || memState.flipped.length >= 2) return;
+
+      card.isFlipped = true;
+      memState.flipped.push(card);
+      renderMemoryGrid();
+
+      if (memState.flipped.length === 2) {
+        memState.moves++;
+        document.getElementById('memMoves').innerText = memState.moves;
+
+        const [c1, c2] = memState.flipped;
+        if (c1.id === c2.id) {
+          c1.isMatched = true;
+          c2.isMatched = true;
+          memState.matchedCount++;
+          document.getElementById('memPairs').innerText = `${memState.matchedCount} / ${memState.totalPairs}`;
+          memState.flipped = [];
+
+          if (memState.matchedCount === memState.totalPairs) {
+            clearInterval(memState.timer);
+            document.getElementById('memBest').innerText = '성공! 🎉';
+            recordHumanPlayScore('memory', memState.seconds, `${memState.seconds}초 (${memState.moves}회)`);
+            grantReward(150, 0.8, '메모리 카드 클리어');
+          }
+        } else {
+          setTimeout(() => {
+            c1.isFlipped = false;
+            c2.isFlipped = false;
+            memState.flipped = [];
+            renderMemoryGrid();
+          }, 800);
+        }
+      }
+    }
+
+    function resetMemoryGame() {
+      if (memState.timer) clearInterval(memState.timer);
+      document.getElementById('memPlay').classList.add('hidden');
+      document.getElementById('memSetup').classList.remove('hidden');
+    }
+
+    // --- Game 3: Quiz Logic ---
+    const QUIZ_BANK = [
+      { cat: 'rules', q: '야구 경기에서 한 이닝당 주어지는 아웃 카운트는 몇 개인가요?', opts: ['2개', '3개', '4개', '5개'], ansIndex: 1, exp: '한 이닝당 공격 팀은 3개의 아웃 카운트를 받습니다.' },
+      { cat: 'rules', q: '투수가 투구 동작 중 부정행위나 규칙을 위반할 때 선언되는 반칙은?', opts: ['보크(Balk)', '스트라이크', '볼', '파울'], ansIndex: 0, exp: '투수의 부적절한 움직임은 보크로 판정되어 주자가 한 베이스씩 진루합니다.' },
+      { cat: 'rules', q: '타자가 친 공이 파울라인 안쪽에 떨어졌지만, 1루나 3루를 지나기 전 파울 지역으로 나간 경우 판정은?', opts: ['페어', '파울', '볼', '아웃'], ansIndex: 1, exp: '1루/3루 베이스를 지나기 전에 파울 라인 밖으로 나가면 파울입니다.' },
+      { cat: 'rules', q: '볼카운트 쓰리볼 투스트라이크 상태를 무엇이라 부르나요?', opts: ['풀카운트', '노카운트', '클린카운트', '퍼펙트'], ansIndex: 0, exp: '3볼 2스트라이크 상황을 풀카운트라고 부릅니다.' },
+      { cat: 'rules', q: '2아웃 상황에서 포수가 3번째 스트라이크 공을 놓쳤을 때 타자가 1루로 달릴 수 있는 규칙은?', opts: ['낫아웃(Uncaught Third Strike)', '태그아웃', '포스아웃', '플라이아웃'], ansIndex: 0, exp: '포수가 3스트라이크 공을 포구하지 못하면 낫아웃 상태가 되어 타자가 1루로 진루할 수 있습니다.' },
+      { cat: 'kbo', q: 'KBO 리그에서 최초로 통산 400홈런을 달성한 선수는?', opts: ['이승엽', '최정', '박병호', '양준혁'], ansIndex: 0, exp: '이승엽 선수가 KBO 최초 통산 400홈런 고지를 밟았습니다.' },
+      { cat: 'kbo', q: 'KBO 리그 한 시즌 최다 홈런 기록(56개)을 보유한 선수는?', opts: ['이승엽', '박병호', '최정', '로하스'], ansIndex: 0, exp: '이승엽 선수가 2003년 56개의 홈런을 쏘아 올려 한 시즌 최다 기록을 만들었습니다.' },
+      { cat: 'kbo', q: 'KBO 리그 역대 단일 시즌 최다 안타 기록(201개)을 세운 타자는?', opts: ['서건창', '이정후', '손아섭', '박용택'], ansIndex: 0, exp: '서건창 선수가 2014년 최초로 200안타를 돌파하며 201안타를 기록했습니다.' },
+      { cat: 'kbo', q: 'KBO 리그 통산 최다 안타 및 최다 홈런을 갱신 중인 대기록의 타자는?', opts: ['최정', '이대호', '김현수', '손아섭'], ansIndex: 0, exp: '최정 선수는 KBO 최다 홈런 기록을 지속적으로 경신하고 있습니다.' },
+      { cat: 'kbo', q: 'KBO 프로야구가 공식 출범한 연도는 언제일까요?', opts: ['1982년', '1988년', '1990년', '1979년'], ansIndex: 0, exp: '한국프로야구(KBO 리그)는 1982년에 6개 구단으로 공식 개막했습니다.' },
+      { cat: 'trivia', q: '투수가 공을 던질 때 손가락으로 공의 봉합선(실밥)을 잡는 이유는 무엇인가요?', opts: ['회전과 변화구를 만들기 위해', '손이 덜 아파서', '공을 깨끗하게 유지하기 위해', '규칙이라서'], ansIndex: 0, exp: '실밥을 채워 공기 저항과 회전력을 조절하여 변화구를 만듭니다.' },
+      { cat: 'trivia', q: '투수가 단 한 명의 주자도 루상에 출루시키지 않고 승리하는 대기록은?', opts: ['퍼펙트 게임', '노히트 노런', '완봉승', '퀄리티 스타트'], ansIndex: 0, exp: '안타, 사사구, 실책 등 단 하나의 출루도 허용하지 않고 완막하는 것을 퍼펙트 게임이라고 합니다.' },
+      { cat: 'trivia', q: '투수가 6이닝 이상 투구하고 3자책점 이하로 막아낸 좋은 투구를 뜻하는 용어는?', opts: ['퀄리티 스타트(QS)', '세이브', '홀드', '블론세이브'], ansIndex: 0, exp: 'QS는 선발 투수의 꾸준함과 안정성을 나타내는 대표적인지표입니다.' },
+      { cat: 'trivia', q: '야구장에서 홈런 타구가 때린 노란색 기둥 경계선 구조물의 명칭은?', opts: ['파울 폴(Foul Pole)', '센터 폴', '그린 몬스터', '펜스 라인'], ansIndex: 0, exp: '파울 폴대에 맞은 타구는 무조건 홈런으로 인정됩니다.' },
+      { cat: 'trivia', q: '한 타석에서 타자가 안타, 2루타, 3루타, 홈런을 모두 기록하는 진기록은?', opts: ['사이클링 히트', '트리플 크라운', '그랜드 슬램', '백투백 홈런'], ansIndex: 0, exp: '4가지 종류의 안타를 한 경기에 모두 치는 것을 사이클링 히트(힛 포 더 사이클)라고 부릅니다.' }
+    ];
+
+    let quizState = { currentIdx: 0, score: 0, streak: 0, filtered: [] };
+
+    function startQuiz() {
+      const cat = document.getElementById('quizCategory').value;
+      if (cat === 'all') quizState.filtered = JSON.parse(JSON.stringify(QUIZ_BANK));
+      else quizState.filtered = JSON.parse(JSON.stringify(QUIZ_BANK.filter(q => q.cat === cat)));
+
+      if (quizState.filtered.length === 0) quizState.filtered = JSON.parse(JSON.stringify(QUIZ_BANK));
+      shuffle(quizState.filtered);
+
+      quizState.currentIdx = 0;
+      quizState.score = 0;
+      quizState.streak = 0;
+
+      document.getElementById('quizSetup').classList.add('hidden');
+      document.getElementById('quizResult').classList.add('hidden');
+      document.getElementById('quizPlay').classList.remove('hidden');
+
+      showQuizQuestion();
+    }
+
+    function showQuizQuestion() {
+      const q = quizState.filtered[quizState.currentIdx];
+      document.getElementById('quizProgressText').innerText = `문제 ${quizState.currentIdx + 1} / ${quizState.filtered.length}`;
+      document.getElementById('quizScoreText').innerText = `점수: ${quizState.score}점 (연속 ${quizState.streak})`;
+
+      const pct = ((quizState.currentIdx) / quizState.filtered.length) * 100;
+      document.getElementById('quizProgressBar').style.width = `${pct}%`;
+
+      document.getElementById('quizQuestion').innerText = q.q;
+      document.getElementById('quizExplanation').classList.add('hidden');
+      document.getElementById('btnNextQuiz').classList.add('hidden');
+
+      const correctAnswerText = q.opts[q.ansIndex];
+      const shuffledOpts = [...q.opts];
+      shuffle(shuffledOpts);
+      const newCorrectIdx = shuffledOpts.indexOf(correctAnswerText);
+      q.currentShuffledCorrectIdx = newCorrectIdx;
+
+      const optsEl = document.getElementById('quizOptions');
+      optsEl.innerHTML = '';
+      shuffledOpts.forEach((optText, i) => {
+        const btn = document.createElement('button');
+        btn.className = "p-3 bg-white border border-purple-200 rounded-2xl font-bold text-slate-800 hover:bg-purple-50 transition text-left shadow-sm leading-normal";
+        btn.innerText = `${i + 1}. ${optText}`;
+        btn.onclick = () => answerQuiz(i, q.currentShuffledCorrectIdx);
+        optsEl.appendChild(btn);
+      });
+    }
+
+    function answerQuiz(selectedIdx, correctIdx) {
+      const q = quizState.filtered[quizState.currentIdx];
+      const isCorrect = (selectedIdx === correctIdx);
+
+      if (isCorrect) {
+        quizState.score += 10 + (quizState.streak * 2);
+        quizState.streak++;
+        document.getElementById('quizResultTitle').innerText = '⭕ 정답입니다!';
+        document.getElementById('quizResultTitle').className = 'font-extrabold text-[11px] mb-0.5 text-emerald-600 leading-snug';
+      } else {
+        quizState.streak = 0;
+        document.getElementById('quizResultTitle').innerText = '❌ 오답입니다!';
+        document.getElementById('quizResultTitle').className = 'font-extrabold text-[11px] mb-0.5 text-rose-600 leading-snug';
+      }
+
+      document.getElementById('quizExplainText').innerText = q.exp;
+      document.getElementById('quizExplanation').classList.remove('hidden');
+      document.getElementById('btnNextQuiz').classList.remove('hidden');
+
+      const btns = document.querySelectorAll('#quizOptions button');
+      btns.forEach((btn, idx) => {
+        btn.onclick = null;
+        if (idx === correctIdx) {
+          btn.className = "p-3 bg-emerald-100 border-2 border-emerald-500 rounded-2xl font-bold text-emerald-900 leading-normal";
+        } else if (idx === selectedIdx && !isCorrect) {
+          btn.className = "p-3 bg-rose-100 border-2 border-rose-400 rounded-2xl font-bold text-rose-900 leading-normal";
+        } else {
+          btn.className = "p-3 bg-slate-100 border border-slate-200 rounded-2xl font-bold text-slate-400 opacity-60 leading-normal";
+        }
+      });
+    }
+
+    function nextQuestion() {
+      quizState.currentIdx++;
+      if (quizState.currentIdx >= quizState.filtered.length) {
+        finishQuiz();
+      } else {
+        showQuizQuestion();
+      }
+    }
+
+    function finishQuiz() {
+      document.getElementById('quizPlay').classList.add('hidden');
+      document.getElementById('quizResult').classList.remove('hidden');
+
+      document.getElementById('quizFinalScore').innerText = `최종 점수: ${quizState.score}점`;
+
+      if (quizState.score >= 80) {
+        document.getElementById('quizFeedback').innerText = '🏅 당신은 대단한 KBO 전문가! 야구 박사이시네요!';
+      } else if (quizState.score >= 50) {
+        document.getElementById('quizFeedback').innerText = '⚾ 훌륭합니다! 훌륭한 KBO 야구 팬이시군요!';
+      } else {
+        document.getElementById('quizFeedback').innerText = '💡 아쉽네요! 더 연습해서 퀴즈왕에 도전해보세요!';
+      }
+
+      recordHumanPlayScore('quiz', quizState.score, `${quizState.score}점`);
+      if (quizState.score >= 30) {
+        grantReward(Math.min(quizState.score * 2, 250), 0.7, '야구 퀴즈 완료');
+      }
+    }
+
+    function resetQuizGame() {
+      document.getElementById('quizPlay').classList.add('hidden');
+      document.getElementById('quizResult').classList.add('hidden');
+      document.getElementById('quizSetup').classList.remove('hidden');
+    }
+
+    // --- Game 4: Home Run Derby Logic ---
+    let hrState = { outs: 10, count: 0, distance: 0, combo: 0, pitching: false, ballPos: 5, gaugePos: 0, gaugeDir: 1, timer: null, markerTimer: null };
+
+    function startHomerunGame() {
+      hrState.outs = 10;
+      hrState.count = 0;
+      hrState.distance = 0;
+      hrState.combo = 0;
+      hrState.pitching = false;
+
+      updateHrUI();
+
+      document.getElementById('hrSetup').classList.add('hidden');
+      document.getElementById('hrPlay').classList.remove('hidden');
+
+      startGaugeAnimation();
+      scheduleNextPitch();
+    }
+
+    function updateHrUI() {
+      document.getElementById('hrOuts').innerText = hrState.outs;
+      document.getElementById('hrCount').innerText = hrState.count;
+      document.getElementById('hrDistance').innerText = `${hrState.distance}m`;
+
+      const comboEl = document.getElementById('hrCombo');
+      if (hrState.combo >= 2) {
+        comboEl.innerText = `COMBO x${hrState.combo}!`;
+        comboEl.classList.remove('hidden');
+      } else {
+        comboEl.classList.add('hidden');
+      }
+    }
+
+    function startGaugeAnimation() {
+      if (hrState.markerTimer) clearInterval(hrState.markerTimer);
+      hrState.gaugePos = 0;
+      hrState.gaugeDir = 1;
+
+      hrState.markerTimer = setInterval(() => {
+        hrState.gaugePos += 3 * hrState.gaugeDir;
+        if (hrState.gaugePos >= 100) { hrState.gaugePos = 100; hrState.gaugeDir = -1; }
+        if (hrState.gaugePos <= 0) { hrState.gaugePos = 0; hrState.gaugeDir = 1; }
+
+        const marker = document.getElementById('hrTimingMarker');
+        if (marker) marker.style.left = `${hrState.gaugePos}%`;
+      }, 20);
+    }
+
+    function scheduleNextPitch() {
+      if (hrState.outs <= 0) {
+        endHomerunGame();
+        return;
+      }
+
+      document.getElementById('hrPitchInfo').innerText = '투수 와인드업...';
+      document.getElementById('hrHitBanner').classList.add('hidden');
+      document.getElementById('hrBall').style.opacity = '0';
+      document.getElementById('hrBall').style.left = '5%';
+
+      setTimeout(() => {
+        if (hrState.outs <= 0) return;
+        pitchBall();
+      }, 1500 + Math.random() * 1000);
+    }
+
+    function pitchBall() {
+      hrState.pitching = true;
+      document.getElementById('hrPitchInfo').innerText = '투구 중! 타이밍을 맞춰 스윙하세요!';
+      const ball = document.getElementById('hrBall');
+      ball.style.opacity = '1';
+
+      hrState.ballPos = 5;
+      if (hrState.timer) clearInterval(hrState.timer);
+
+      hrState.timer = setInterval(() => {
+        hrState.ballPos += 4;
+        ball.style.left = `${hrState.ballPos}%`;
+
+        if (hrState.ballPos >= 88) {
+          clearInterval(hrState.timer);
+          if (hrState.pitching) {
+            hrState.pitching = false;
+            hrState.outs--;
+            hrState.combo = 0;
+            showHrResult('스트라이크 / 포구 패스!', '아쉽습니다!', 'text-rose-400');
+            updateHrUI();
+            scheduleNextPitch();
+          }
+        }
+      }, 30);
+    }
+
+    function swingBat() {
+      if (!hrState.pitching) return;
+      hrState.pitching = false;
+      if (hrState.timer) clearInterval(hrState.timer);
+
+      const bat = document.getElementById('hrBat');
+      bat.style.transform = 'scaleX(-1) rotate(-45deg)';
+      setTimeout(() => { bat.style.transform = 'scaleX(-1) rotate(0deg)'; }, 200);
+
+      const hitZoneOk = (hrState.ballPos >= 65 && hrState.ballPos <= 86);
+      const timingOk = (hrState.gaugePos >= 70 && hrState.gaugePos <= 92);
+
+      if (hitZoneOk && timingOk) {
+        const isPerfect = (hrState.gaugePos >= 80 && hrState.gaugePos <= 88);
+        const addDist = isPerfect ? 140 + Math.floor(Math.random() * 25) : 120 + Math.floor(Math.random() * 20);
+
+        hrState.count++;
+        hrState.distance += addDist;
+        hrState.combo++;
+
+        const titleText = isPerfect ? '🎯 장외 PERFECT HOME RUN!!' : '🚀 HOME RUN!!';
+        showHrResult(titleText, `비거리: ${addDist}m`, 'text-yellow-300');
+      } else if (hitZoneOk || timingOk) {
+        hrState.combo = 0;
+        showHrResult('⚾ 안타!', '담장을 넘기지는 못했습니다!', 'text-cyan-300');
+      } else {
+        hrState.outs--;
+        hrState.combo = 0;
+        showHrResult('❌ 헛스윙 삼진!', '타이밍을 다시 맞춰보세요!', 'text-rose-400');
+      }
+
+      updateHrUI();
+      scheduleNextPitch();
+    }
+
+    function showHrResult(title, sub, textClass) {
+      const banner = document.getElementById('hrHitBanner');
+      const titleEl = document.getElementById('hrHitTitle');
+      const subEl = document.getElementById('hrHitSub');
+
+      titleEl.innerText = title;
+      titleEl.className = `text-base md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] leading-snug ${textClass}`;
+      subEl.innerText = sub;
+
+      banner.classList.remove('hidden');
+    }
+
+    function endHomerunGame() {
+      if (hrState.timer) clearInterval(hrState.timer);
+      if (hrState.markerTimer) clearInterval(hrState.markerTimer);
+
+      document.getElementById('hrPitchInfo').innerText = '챌린지 종료!';
+      showAlert('홈런 더비 종료!', `최종 기록\n홈런 수: ${hrState.count}개\n총 비거리: ${hrState.distance}m`, '🚀');
+
+      recordHumanPlayScore('homerun', hrState.distance, `${hrState.distance}m (${hrState.count}개)`);
+      if (hrState.distance > 0) {
+        grantReward(Math.min(Math.floor(hrState.distance / 2), 300), 0.8, '홈런 더비 종료');
+      }
+    }
+
+    function resetHomerunGame() {
+      if (hrState.timer) clearInterval(hrState.timer);
+      if (hrState.markerTimer) clearInterval(hrState.markerTimer);
+      document.getElementById('hrPlay').classList.add('hidden');
+      document.getElementById('hrSetup').classList.remove('hidden');
+    }
+
+    // --- Game 5: Base Running Marathon Logic ---
+    let runState = { distanceLeft: 100, startTime: 0, timer: null, isRunning: false, timeTaken: 0 };
+
+    function startRunningGame() {
+      runState.distanceLeft = 100;
+      runState.isRunning = true;
+      runState.startTime = Date.now();
+      runState.timeTaken = 0;
+
+      document.getElementById('runDistanceLeft').innerText = '100m';
+      document.getElementById('runCurrentBase').innerText = '타석';
+      document.getElementById('runTimer').innerText = '0.0초';
+      document.getElementById('runnerAvatar').style.left = '2%';
+
+      document.getElementById('runSetup').classList.add('hidden');
+      document.getElementById('runPlay').classList.remove('hidden');
+
+      startRunTimer();
+    }
+
+    function startRunTimer() {
+      if (runState.timer) clearInterval(runState.timer);
+      runState.timer = setInterval(() => {
+        if (!runState.isRunning) return;
+        runState.timeTaken = ((Date.now() - runState.startTime) / 1000).toFixed(1);
+        document.getElementById('runTimer').innerText = `${runState.timeTaken}초`;
+      }, 100);
+    }
+
+    function dashRunner() {
+      if (!runState.isRunning) return;
+
+      runState.distanceLeft -= 3.5;
+      if (runState.distanceLeft <= 0) runState.distanceLeft = 0;
+
+      const progressPct = ((100 - runState.distanceLeft) / 100) * 88 + 2;
+      document.getElementById('runnerAvatar').style.left = `${progressPct}%`;
+      document.getElementById('runDistanceLeft').innerText = `${Math.ceil(runState.distanceLeft)}m`;
+
+      let baseText = '타석';
+      if (runState.distanceLeft <= 25 && runState.distanceLeft > 0) baseText = '3루 통과';
+      else if (runState.distanceLeft <= 50 && runState.distanceLeft > 25) baseText = '2루 통과';
+      else if (runState.distanceLeft <= 75 && runState.distanceLeft > 50) baseText = '1루 통과';
+      else if (runState.distanceLeft === 0) baseText = '홈 슬라이딩 득점!';
+
+      document.getElementById('runCurrentBase').innerText = baseText;
+
+      if (runState.distanceLeft <= 0) {
+        runState.isRunning = false;
+        clearInterval(runState.timer);
+
+        const finalTime = ((Date.now() - runState.startTime) / 1000).toFixed(2);
+        document.getElementById('runTimer').innerText = `${finalTime}초`;
+
+        showAlert('홈인 성공! 🏃‍♂️', `폭풍 질주 완성!\n기록: ${finalTime}초`, '🏁');
+        recordHumanPlayScore('running', parseFloat(finalTime), `${finalTime}초`);
+        grantReward(200, 0.75, '베이스 마라톤 질주');
+      }
+    }
+
+    function resetRunningGame() {
+      if (runState.timer) clearInterval(runState.timer);
+      runState.isRunning = false;
+      document.getElementById('runPlay').classList.add('hidden');
+      document.getElementById('runSetup').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
